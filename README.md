@@ -17,6 +17,12 @@ You only need **bank-heist.html** to copy and run the software. It contains the 
 
 Live play needs internet, the compatible radar/ESP32/LED hardware and one visible controller page. First-time USB camera setup needs desktop Chrome/Edge. Afterwards, use the hosted page for play.
 
+## Interface
+
+Actual maze map from the hosted offline demo, shown in a 16:9 crop. The blue marker is the simulated player; red walls cause penalties and the green vault is the goal.
+
+![Bank Heist maze map in the offline demo](docs/images/bank-heist-map.png)
+
 ## Documentation
 
 | I want to… | Read |
