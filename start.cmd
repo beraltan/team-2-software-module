@@ -1,3 +1,3 @@
 @echo off
 cd /d "%~dp0"
-".venv\Scripts\python.exe" app\server.py %*
+uv run --locked python app\server.py %*

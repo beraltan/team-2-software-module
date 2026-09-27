@@ -1,0 +1,885 @@
+<!doctype html><html lang="en"><head><!-- Team-owned code: MIT License
+
+Copyright (c) 2026 Team 2 contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Upstream Toktik/OOCSI material retains its existing attribution and terms. --><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bank Heist - Team 2</title><style>@import url('data:text/css,');
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:#090f17;color:#eaf4fc}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 0 0,#16313c55,transparent 50%)}main{max-width:1180px;margin:auto;padding:30px}header{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:28px}.eyebrow{font:11px ui-monospace,monospace;letter-spacing:2px;color:#72e7c7}h1{font-size:34px;letter-spacing:-1px;margin:10px 0 6px}h2{font-size:18px;margin:0 0 16px}p{color:#99acbf;line-height:1.6;font-size:14px}a{color:#80dbc8}button,input,select{font:inherit;border-radius:8px;border:1px solid #354c60;padding:10px 13px;background:#182838;color:#eaf4fc}button{cursor:pointer;font-weight:650}button.primary{background:#79e6c4;color:#09211c;border-color:#79e6c4}button:disabled{opacity:.4;cursor:not-allowed}button.danger{background:#572334;border-color:#91405a}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #b0f6e1;outline-offset:3px}.badge{padding:8px 12px;border-radius:30px;border:1px solid #334759;font-size:12px;white-space:nowrap}.badge.live{color:#79e6c4;border-color:#316b59}.badge.bad{color:#ffad83;border-color:#794839}.layout{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(280px,1fr);gap:20px}.card{background:#11202cec;border:1px solid #263b4d;border-radius:18px;padding:24px}.topline{display:flex;justify-content:space-between;align-items:center;gap:12px}.label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#9bacbc}.timer{font:clamp(62px,7vw,92px) ui-monospace,monospace;letter-spacing:-5px;margin:10px 0;color:#ecfff8;font-variant-numeric:tabular-nums}.meter{height:8px;background:#243344;border-radius:5px;margin-top:10px;overflow:hidden}.meter div{height:100%;background:#ff6c75;width:0;transition:width .15s}.metric{display:flex;justify-content:space-between;border-bottom:1px solid #2b3e4f;padding:14px 0;font-size:13px}.metric span{color:#a8b9c8}.metric b{font-variant-numeric:tabular-nums}.message{min-height:80px;margin-top:20px}.message strong{display:block;font-size:20px;margin-bottom:8px}.controls{display:flex;gap:10px;flex-wrap:wrap}.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#aebdcb}.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:5px}.map{width:100%;aspect-ratio:1/1.05;display:block;margin:16px 0}footer{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#7890a5;margin-top:20px}.notice{font-size:12px;padding:12px;border-left:2px solid #78c6ae;color:#a5bbcd;background:#152b37;margin-top:20px}.events{list-style:none;padding:0;margin:10px 0 0;font:12px ui-monospace,monospace;color:#a6b8c8}.events li{padding:8px 0;border-bottom:1px solid #24394b}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-grid label{display:grid;gap:7px;font-size:13px;color:#aec0cf}input,select{width:100%}input[type=checkbox]{width:auto}.full{grid-column:1/-1}.stack{display:grid;gap:20px}.error{color:#ffb391;min-height:20px}.small{font-size:12px}.key{font-family:ui-monospace,monospace}.success{color:#80e6c7}@media(max-width:760px){main{padding:18px}.layout{grid-template-columns:1fr}header{align-items:flex-start}h1{font-size:28px}.card{padding:18px}.timer{font-size:76px}.form-grid{grid-template-columns:1fr}.map{aspect-ratio:1}}
+
+.setup{margin-bottom:24px}.setup details{margin:20px 0}.setup summary{cursor:pointer;font-weight:650;padding:12px 0}.setup .check{display:block;margin:20px 0;line-height:1.6}.setup .form-grid{margin:16px 0}[hidden]{display:none!important}@media(max-width:500px){header,.topline{flex-wrap:wrap}.metric{gap:12px}.metric b{text-align:right;overflow-wrap:anywhere}.controls button{min-height:44px}.timer{font-size:64px}.setup input,.setup select{min-width:0;width:100%}}
+
+body:not(.ready) main{display:none}#header{position:static!important;padding:12px!important}#canvasContainer{position:static!important}
+#team-modal{position:fixed;inset:0;z-index:10;width:100%;height:100%;max-width:none;max-height:none;border:0;background:#090f17;color:#eaf4fc;display:grid;place-items:center}
+#team-modal article{max-width:560px;width:calc(100% - 36px);padding:28px;border:1px solid #354c60;border-radius:18px;background:#11202c}#team-modal fieldset{border:0;padding:0;display:flex;gap:12px}#team-modal input[type=submit]{width:auto}#team-modal small{display:block;line-height:1.7}
+#courseHelp{position:fixed;z-index:11;bottom:20px;left:0;right:0;text-align:center;background:#090f17;padding:12px}body.ready #courseHelp{display:none}input{user-select:text!important}
+</style><script>
+// Adapted from Toktik, Copyright (c) 2024–2026 Mathias Funk / TU/e.
+// Team 2 adaptations; see THIRD_PARTY.md in the source repository.
+const demo=new URLSearchParams(location.search).get('demo')==='1';
+window.oocsiThingsConfig={teamspace:''};
+if(!demo){var OOCSI = (function() {
+
+  var wsUri = "ws://localhost/ws";
+  var username;
+  var handlers = Object.create(null);
+  var responders = Object.create(null);
+  var calls = Object.create(null);
+  var websocket;
+  var logger = internalLog;
+  var error = internalError;
+
+  function isDangerousKey(key) {
+    return key === '__proto__' || key === 'prototype' || key === 'constructor';
+  }
+
+  function init() {
+    logger("CONNECTING to "  + wsUri);
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = onOpen;
+    websocket.onclose = onClose;
+    websocket.onmessage = onMessage;
+    websocket.onerror = onError;
+  }
+
+  function onOpen(evt) {
+    if(websocket.readyState === WebSocket.OPEN) {
+      submit(username);
+    }  
+    logger("CONNECTED");
+  }
+
+  function onClose(evt) {
+    logger("DISCONNECTED");
+  }
+
+  function onMessage(evt) {
+    if(evt.data !== 'ping') {
+      try {
+        var e = JSON.parse(evt.data);
+        if(e && e.data && typeof e.data === 'object') {
+          var msgId = e.data['_MESSAGE_ID'];
+          if(msgId && calls[msgId] !== undefined) {
+            var c = calls[msgId];
+
+            if((+new Date) < c.expiration) {
+              delete e.data['_MESSAGE_ID'];
+              c.fn(e.data);
+            }
+
+            delete calls[msgId];
+          } else if(e.recipient && !isDangerousKey(e.recipient) && handlers[e.recipient] !== undefined) {
+            handlers[e.recipient].forEach((fn) => { if (typeof fn === 'function') { fn(e); } });
+          } else {
+            logger('no handler for event: ' + evt.data);
+          }
+        }
+      } catch(e) {
+        logger('ERROR: parse exception for event data ' + evt.data);
+      }
+      logger('RESPONSE: ' + evt.data);
+    } else if(evt.data.length > 0) {
+      websocket.send(".");
+    }
+  }
+
+  function onError(evt) {
+    error();
+    logger('ERROR: ' + evt);
+  }
+
+  function waitForSocket(fn) {
+    if(!websocket || websocket.readyState === WebSocket.CONNECTING) {
+      setTimeout(function() { waitForSocket(fn) }, 200);
+    } else {
+      fn();
+    }
+  } 
+
+  function submit(message) {
+    if(websocket && websocket.send(message)) {
+      logger("SENT: " + message); 
+    }
+  }
+
+  function internalClose() {
+    websocket && websocket.close();
+  }
+
+  function internalLog(message) {
+    // do nothing by default
+  }
+
+  function internalError() {
+    // do nothing by default
+  }
+
+  function internalConnected() {
+    return websocket ? websocket.readyState === WebSocket.OPEN : false;
+  }
+
+  function internalSend(client, data) {
+    internalConnected() && submit('sendjson ' + client + ' '+ JSON.stringify(data));
+  } 
+
+  function cleanupExpiredCalls() {
+    var now = +new Date();
+    for (var id in calls) {
+      if (calls[id] && now >= calls[id].expiration) {
+        delete calls[id];
+      }
+    }
+  }
+
+  function internalCall(call, data, timeout, fn) {
+    if(internalConnected()) {
+      cleanupExpiredCalls();
+      var uuid = guid();
+      calls[uuid] = {expiration: (+new Date) + timeout, fn: fn};
+      data['_MESSAGE_ID'] = uuid;
+      data['_MESSAGE_HANDLE'] = call;
+      submit('sendjson ' + call + ' '+ JSON.stringify(data));
+    }
+  } 
+
+  function internalRegister(call, fn) {
+    if(internalConnected() && !isDangerousKey(call)) {
+      responders[call] = {fn: fn};
+      internalSubscribe(call, function(e) {
+        var response = {'_MESSAGE_ID': e.data['_MESSAGE_ID']};
+        fn(e.data, response);
+        internalSend(e.sender, response);
+      });
+    }
+  }
+
+  function internalSubscribe(channel, fn) {
+    if (!channel || isDangerousKey(channel)) {
+      return;
+    }
+    if(internalConnected()) {
+      submit('subscribe ' + channel);
+      if(handlers[channel] === undefined) {
+        handlers[channel] = [];
+      }
+      if (typeof fn === 'function' && handlers[channel].indexOf(fn) === -1) {
+        handlers[channel].push(fn);
+      }
+    } 
+  } 
+
+  function internalUnsubscribe(channel) {
+    if(internalConnected()) {
+      submit('unsubscribe ' + channel);
+      if (!isDangerousKey(channel)) {
+        handlers[channel] = [];
+      }
+    }
+  }
+
+  function internalReconnect() {
+    if(!internalConnected() && (!websocket || websocket.readyState !== WebSocket.CONNECTING)) {
+      logger("RECONNECTING");
+      init();
+      // reconnect subscriptions
+      waitForSocket(function() {
+        for (var ch in handlers) {
+          if (!isDangerousKey(ch) && handlers[ch] && handlers[ch].length > 0) {
+            submit('subscribe ' + ch);
+          }
+        }
+      });
+    }
+  }
+
+  function guid() {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+      var buf = new Uint8Array(16);
+      crypto.getRandomValues(buf);
+      buf[6] = (buf[6] & 0x0f) | 0x40;
+      buf[8] = (buf[8] & 0x3f) | 0x80;
+      var hex = Array.from(buf, function(b) { return b.toString(16).padStart(2, '0'); }).join('');
+      return hex.substring(0, 8) + '-' + hex.substring(8, 12) + '-' + hex.substring(12, 16) + '-' + hex.substring(16, 20) + '-' + hex.substring(20);
+    }
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+  }
+
+  return {
+    connect: function(server, clientName, fn) {
+      wsUri = server;
+      username = clientName && clientName.length > 0 ? clientName : "webclient_####";
+      username = username.replace(/#/g, function() {
+        if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+          var buf = new Uint8Array(1);
+          crypto.getRandomValues(buf);
+          return (buf[0] % 10).toString();
+        }
+        return Math.floor(Math.random() * 10).toString();
+      });
+      if (fn && typeof fn === 'function') {
+        handlers[username] = [fn];
+      } else {
+        handlers[username] = [];
+      }
+      init();
+      setInterval(internalReconnect, 1000);
+      setInterval(cleanupExpiredCalls, 10000);
+    },
+    send: function(recipient, data) {
+      waitForSocket(function() {
+        internalSend(recipient, data);
+      });
+    },
+    call: function(call, data, timeout, fn) {
+      waitForSocket(function() {
+        internalCall(call, data, timeout, fn);
+      });
+    },
+    register: function(call, fn) {
+      waitForSocket(function() {
+        internalRegister(call, fn);
+      });
+    },
+    subscribe: function(channel, fn) {
+      waitForSocket(function() {
+        internalSubscribe(channel, fn);
+      });
+    },
+    unsubscribe: function(channel) {
+      waitForSocket(function() {
+        internalUnsubscribe(channel);
+      });
+    },
+    variable: function(channel, name, throttle = 500) {
+      var listeners = [];
+      var value;
+      var lastUpdate = 0;
+
+      function notify(newValue) {
+        // notify all subscribers of a value update (even if value is same)
+        listeners.forEach(function(listener) { listener(newValue); });
+      }
+
+      function accessor(newValue, broadcast = true) {
+        // without arguments, we just return the current value
+        if (arguments.length === 0) { return value; }
+
+        // only update if timeout has passed
+        if(lastUpdate + throttle > Date.now()) { return; }
+        lastUpdate = Date.now();
+
+        // remember whether changed, then update local value
+        let changed = newValue !== value;
+        value = newValue;
+
+        // notify internal subscribers, regardless of change or not
+        notify(value);
+
+        // only update if new value is different
+        if(changed && broadcast) {
+          // send new value to OOCSI
+          let data = {}
+          data[name] = value
+          internalSend(channel, data);
+        }
+
+        return value;
+      }
+
+      // allow subscribers to changes in the value
+      accessor.subscribe = function(listener) { listeners.push(listener); };
+
+      // subscribe to OOCSI for getting external updates on value
+      this.subscribe(channel, function(e) { if(e.data.hasOwnProperty(name)) { accessor(e.data[name], false) } });
+
+      return accessor;
+    },
+    isConnected: function() {
+      return internalConnected();
+    },
+    handle: function() {
+      return username;
+    },
+    close: function() {
+      waitForSocket(function() {
+        internalClose();
+      });
+    },
+    handlers: function() {
+      return handlers;
+    },
+    logger: function(fn) {
+      logger = fn;
+    },
+    error: function (fn) {
+      error = fn;
+    },
+    heyOOCSI: function(name) {
+      var device_name = name || username;
+      var data = {}
+      data[device_name] = {}
+      data[device_name]['properties'] = {
+        device_id: username
+      }
+      data[device_name]['location'] = {}
+      data[device_name]['components'] = {}
+      var components = data[device_name]['components']
+      logger(`Added heyOOCSI device ${device_name}`)
+
+      return {
+            add_property: function(property, propertyValue) {
+           data[device_name]['properties'][property] = propertyValue;
+        },
+        add_location: function(location, latitude, longitude) {
+           data[device_name]['properties'][location] = [latitude, longitude];
+        },
+        add_sensor_brick: function(sensor_name, sensor_channel, sensor_type, sensor_unit, sensor_default, icon) {
+           components[sensor_name] = {}
+           components[sensor_name]['channel_name'] = sensor_channel
+           components[sensor_name]['type'] = 'sensor'
+           components[sensor_name]['sensor_type'] = sensor_type
+           components[sensor_name]['unit'] = sensor_unit
+           components[sensor_name]['value'] = sensor_default
+           components[sensor_name]['icon'] = icon
+           logger(`Added ${sensor_name} to the components list for device ${device_name}.`)
+        },
+        add_number_brick: function(number_name, number_channel, number_min_max, number_unit, number_default, icon) {
+           components[number_name] = {}
+           components[number_name]['channel_name'] = number_channel
+           components[number_name]['type'] = 'number'
+           components[number_name]['min_max'] = number_min_max
+           components[number_name]['unit'] = number_unit
+           components[number_name]['value'] = number_default
+           components[number_name]['icon'] = icon
+           logger(`Added ${number_name} to the components list for device ${device_name}.`)
+        },
+        add_binary_sensor_brick: function(sensor_name, sensor_channel, sensor_type, sensor_default, icon) {
+           components[sensor_name] = {}
+           components[sensor_name]['channel_name'] = sensor_channel
+           components[sensor_name]['type'] = 'binary_sensor'
+           components[sensor_name]['sensor_type'] = sensor_type
+           components[sensor_name]['state'] = sensor_default
+           components[sensor_name]['icon'] = icon
+           logger(`Added ${sensor_name} to the components list for device ${device_name}.`)
+        },
+        add_switch_brick: function(switch_name, switch_channel, switch_type, switch_default, icon) {
+           components[switch_name] = {}
+           components[switch_name]['channel_name'] = switch_channel
+           components[switch_name]['type'] = 'switch'
+           components[switch_name]['sensor_type'] = switch_type
+           components[switch_name]['state'] = switch_default
+           components[switch_name]['icon'] = icon
+           logger(`Added ${switch_name} to the components list for device ${device_name}.`)
+        },
+        add_light_brick: function(light_name, light_channel, led_type, spectrum, mired_min_max, light_default_state, light_default_brightness, icon) {
+           components[light_name] = {}
+           components[light_name]['channel_name'] = light_channel
+           components[light_name]['type'] = 'light'
+           components[light_name]['ledType'] = led_type
+           components[light_name]['spectrum'] = spectrum
+           components[light_name]['min_max'] = mired_min_max
+           components[light_name]['state'] = light_default_state
+           components[light_name]['brightness'] = light_default_brightness
+           components[light_name]['icon'] = icon
+           logger(`Added ${light_name} to the components list for device ${device_name}.`)
+        },
+        submit: function() {
+          OOCSI.send('heyOOCSI!', data)
+        },
+        sayHi: function() {
+          OOCSI.send('heyOOCSI!', data)
+        }
+      };
+    }
+  };
+
+})();
+
+let globalSettings={};const server="oocsi.id.tue.nl",namespace="OOCSI-things";window.mocha=!0,window.addEventListener("DOMContentLoaded",()=>{document.querySelectorAll("#header,#canvasContainer").forEach(e=>e.remove());const e=document.head.appendChild(document.createElement("style"));e.sheet.insertRule("* { -webkit-user-select: none; -ms-user-select: none; user-select: none; }",0),e.sheet.insertRule("#header {\n      position: fixed;\n      z-index: 1;\n      width: 100%;\n      display: block;\n      padding: 0.1rem 0.5rem;\n      background: rgba(0, 0, 0, 0.5);\n      color: #fff9c1;\n      cursor: pointer;\n    }",1),e.sheet.insertRule("#header span:hover { position: relative; top: -2px; }",2),e.sheet.insertRule("#activity, #connection { opacity: 0; }",3),e.sheet.insertRule("#header .grey { color: #777; }",4),e.sheet.insertRule("#header .red { color: #f35588; }",5),e.sheet.insertRule("#header .green { color: #78dec7; }",6),e.sheet.insertRule("#header .purple { color: #c244fb; }",7),e.sheet.insertRule("#header .blue { color: #84e9ff; }",8),e.sheet.insertRule("#canvasContainer { position: fixed; }",9);let t=document.querySelector("body").innerHTML;if(document.querySelector("body").innerHTML='\n    <div id="header"></div>\n    <div id="canvasContainer"></div>'+t,window.oocsiThingsConfig&&window.oocsiThingsConfig.teamspace&&window.oocsiThingsConfig.teamspace.trim().length>0)return void i(window.oocsiThingsConfig.teamspace);document.querySelector("#canvasContainer").innerHTML=`<dialog id="team-modal" open><article>\n      <h2><a href="index.html" style="color: var(--pico-h2-color); text-decoration: none;" alt="Back to the overview" title="Back to the overview">OOCSI Things 🌟</a></h2>\n      <label for="team-choice">Choose a team:</label>\n      <form>\n        <fieldset role="group">\n          <input list="team-choices" id="team-choice" name="team-choice" />\n          <datalist id="team-choices">\n            ${Array(20).fill(0).map((e,t)=>`<option value="Team ${t+1}"></option>`).join(" ")}\n            <option value="Team Test"></option>\n          </datalist>\n          <input type="submit" value="Go!">\n        </fieldset>\n      </form>\n      <small>\n        Connecting via <code>${server}</code>... <a href="#" id="download-source" style="float: right">Download Source</a>\n      </small>\n    </article></dialog>`;let n=document.cookie.split("; ").find(e=>e.startsWith("ot_teamName=")),o=n?n.split("=")[1]:void 0;function i(e){let t=e.toLowerCase();t=t.replace(/\s+/g,"-"),t=t.replace(/[^a-z0-9-]/g,"");let n=t.replace(/^-+|-+$/g,"");globalSettings.team=e,globalSettings.channel=(namespace.length>0?namespace+"/":"")+n,function(e,t){const n=new Date(Date.now()+31536e6).toUTCString();document.cookie=`${e}=${t}; expires=${n}; path=/`}("ot_teamName",e),window.thing&&window.thing(),delete window.mocha,void 0!==window.p5&&new p5}document.querySelector("#team-choice").value=void 0!==o?decodeURIComponent(o):"",document.querySelector("#team-modal input[type=submit]").addEventListener("click",e=>{e.preventDefault();let t=document.querySelector("#team-choice").value;document.querySelector("#team-modal").remove(),i(t)}),document.querySelector("#download-source").addEventListener("click",e=>{e.preventDefault();let t=document.documentElement.outerHTML;t=t.replace(/"\/assets\//g,'"'+location.origin+"/assets/");const n=new Blob([t],{type:"text/html"}),o=URL.createObjectURL(n),i=document.createElement("a");i.href=o,i.download=location.pathname.split("/").pop()||"thing.html",i.click()})}),window.oocsiThings=(()=>{let e,t={},n={};return{register:(e,t,o,i)=>{document.title="OOCSI Things: "+e;const a="wss://";OOCSI.connect(a+server+"/ws",globalSettings.channel+"/"+t+"_##"),globalSettings.appName=e,globalSettings.appSlug=t,globalSettings.id=globalSettings.appSlug+Date.now()%1e3,setInterval(()=>{OOCSI.send(globalSettings.channel,{name:globalSettings.appName,slug:globalSettings.appSlug,id:globalSettings.id,in:o,out:i})},8e3),OOCSI.subscribe(globalSettings.channel,e=>{void 0!==e.data.id&&(n[e.data.id]=e.data,n[e.data.id].timestamp=Date.now())});let l=document.querySelector("#header");l.innerHTML=`<b class="grey">${globalSettings.team}:</b> ${globalSettings.appName} `;for(let e of o)l.innerHTML+=`<span title="${e}" class="purple">&darr;</span>`;for(let e of i)l.innerHTML+=`<span title="${e}" class="blue">&uarr;</span>`;l.innerHTML+='<span id="activity">&starf;</span>',l.innerHTML+='<span id="connection" class="red">&#9832;</span>',l.addEventListener("click",()=>{window.location.reload()}),document.querySelector("body").style.overflow="hidden",setInterval(()=>{OOCSI.isConnected()?document.querySelector("#connection").style.opacity="0":document.querySelector("#connection").style.opacity="1.0"},1e3)},data:e=>(t[e]=OOCSI.variable(globalSettings.channel,globalSettings.appSlug+"_"+e),t[e]),connect:(e,n,o)=>{if(t[o=o||n]){OOCSI.variable(globalSettings.channel,e+"_"+n).subscribe(e=>{t[o](e)})}},link:(e,n,o)=>{if(t[o=o||n]){OOCSI.variable(globalSettings.channel,e+"_"+n).subscribe(e=>{t[o](e)})}},subscribe:e=>{OOCSI.subscribe(globalSettings.channel,e)},activity:()=>{document.querySelector("#activity").style.opacity="1.0",setTimeout(()=>{document.querySelector("#activity").style.opacity="0"},200)},devices:()=>{const e=Date.now();return n=Object.entries(n).reduce((t,[n,o])=>{const i=o.timestamp;return e-i<=2e4&&(t[n]=o),t},{}),n},requestDeviceMotion:()=>(void 0!==e||("undefined"!=typeof DeviceMotionEvent&&"function"==typeof DeviceMotionEvent.requestPermission?DeviceMotionEvent.requestPermission().then(t=>{"granted"===t&&(e=!0)}).catch(t=>{document.querySelector("#header").insertAdjacentHTML("afterend",'\n              <div id="requestMotionElement" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center; z-index: 1000;">\n                <button>Request device motion</button>\n              </div>\n            ');document.querySelector("#requestMotionElement button").onclick=function(){DeviceMotionEvent.requestPermission().then(t=>{"granted"===t&&(e=!0),document.querySelector("#requestMotionElement").remove()}).catch(t=>{e=!1,console.error(t)})}}):(e=!1,console.error("DeviceMotionEvent not supported"))),e)}})();
+window.getCourseChannel=()=>globalSettings.channel;}
+</script><script>const modules={};
+modules.spatial=(()=>{
+// LD2450 Cartesian millimetres. No camera perspective warp or invented height correction.
+const nominalCoverage=(x,y)=>Number.isFinite(x)&&Number.isFinite(y)&&y>0&&Math.hypot(x,y)<=6000&&Math.abs(Math.atan2(x,y))<=Math.PI/3;
+function rectangularField(width=3000,depth=2000,near=1500){
+  if(![width,depth,near].every(Number.isFinite)||width<2100||width>3000||depth<1800||depth>3000||near<1500||near+depth>4500)throw Error('Use width 2100–3000 mm, depth 1800–3000 mm, near edge ≥1500 mm and far edge ≤4500 mm.');
+  const play=[-width/2,width/2,near,near+depth];
+  if(![play[0],play[1]].every(x=>[play[2],play[3]].every(y=>nominalCoverage(x,y))))throw Error('Field extends outside nominal radar coverage.');
+  const cw=width/3,ch=depth/3,pad=100;
+  return {play,start:[play[0]+pad,play[0]+cw-pad,near+pad,near+ch-pad],goal:[play[1]-cw+pad,play[1]-pad,play[3]-ch+pad,play[3]-pad]};
+}
+function mapProjection(play,width,height,pad=44){
+  // Show the sensor origin as well as the playable rectangle. Equal scale on both axes.
+  const bounds=[Math.min(play[0],0)-200,Math.max(play[1],0)+200,0,play[3]+200];
+  const scale=Math.min((width-2*pad)/(bounds[1]-bounds[0]),(height-2*pad)/(bounds[3]-bounds[2]));
+  const left=(width-(bounds[1]-bounds[0])*scale)/2,top=(height-(bounds[3]-bounds[2])*scale)/2;
+  return {scale,point:(x,y)=>[left+(x-bounds[0])*scale,top+(bounds[3]-y)*scale]};
+}
+
+return {rectangularField,mapProjection,nominalCoverage};})();
+modules.maze=(()=>{
+// Perfect mazes: a randomized spanning tree gives one route between any two rooms.
+function mazeSettings(play,difficulty='hard') {
+  const levels={normal:[3,3],hard:[4,3],expert:[5,4]};
+  if(!Object.hasOwn(levels,difficulty))throw Error('Choose normal, hard or expert maze difficulty.');
+  const [l,r,n,f]=play,[maxCols,maxRows]=levels[difficulty];
+  // 200 mm walls and >=600 mm cell pitch leave >=400 mm clear corridors.
+  const cols=Math.min(maxCols,Math.floor((r-l)/600)),rows=Math.min(maxRows,Math.floor((f-n)/600));
+  const w=(r-l)/cols,h=(f-n)/rows,wall_mm=200,pad=wall_mm/2+40;
+  return {cols,rows,wall_mm,start:[l+pad,l+w-pad,n+pad,n+h-pad],goal:[r-w+pad,r-pad,f-h+pad,f-pad]};
+}
+const edge=(a,b)=>a<b?`${a}:${b}`:`${b}:${a}`;
+function solve(edges,cols,rows){
+  const graph=Array.from({length:cols*rows},()=>[]);
+  for(const key of edges){const [a,b]=key.split(':').map(Number);graph[a].push(b);graph[b].push(a);}
+  const parent=new Map([[0,-1]]),queue=[0];
+  for(const a of queue)for(const b of graph[a])if(!parent.has(b)){parent.set(b,a);queue.push(b);}
+  const path=[];for(let at=cols*rows-1;at!==-1;at=parent.get(at))path.push(at);path.reverse();
+  return {path,graph,deadEnds:graph.filter((v,i)=>v.length===1&&!path.includes(i)).length};
+}
+function makeMaze(random=Math.random,play=[-1500,1500,1500,3500],difficulty='hard'){
+  const settings=mazeSettings(play,difficulty),{cols,rows,wall_mm}=settings,count=cols*rows;
+  const neighbours=a=>[a%cols<cols-1?a+1:-1,Math.floor(a/cols)<rows-1?a+cols:-1,a%cols>0?a-1:-1,a>=cols?a-cols:-1].filter(v=>v>=0);
+  let best=null;const candidates=[];
+  for(let attempt=0;attempt<96;attempt++){
+    const edges=new Set(),seen=new Set([0]),stack=[0];
+    while(stack.length){const a=stack.at(-1),options=neighbours(a).filter(b=>!seen.has(b));if(!options.length){stack.pop();continue;}
+      const b=options[Math.min(options.length-1,Math.floor(random()*options.length))];edges.add(edge(a,b));seen.add(b);stack.push(b);}
+    const info=solve(edges,cols,rows);
+    // Prefer a long solution, but retain wrong turns rather than only one corridor.
+    const score=info.path.length+(info.deadEnds?3:0);
+    if(info.path.length>=cols+rows+1&&info.deadEnds>0)candidates.push({edges,...info,score});
+    if(!best||score>best.score)best={edges,...info,score};
+  }
+  if(candidates.length)best=candidates[Math.min(candidates.length-1,Math.floor(random()*candidates.length))];
+  // Deterministic fallback guarantees a detour even with a constant RNG.
+  if(best.path.length<cols+rows+1){
+    const edges=new Set(),snake=[];
+    if(rows%2){for(let y=0;y<rows;y++)for(let x=0;x<cols;x++)snake.push(y*cols+(y%2?cols-1-x:x));}
+    else {const usedCols=cols%2?cols:cols-1;for(let x=0;x<usedCols;x++)for(let y=0;y<rows;y++)snake.push((x%2?rows-1-y:y)*cols+x);
+      if(usedCols<cols){snake.push(count-1);for(let y=rows-2;y>=0;y--)snake.push(y*cols+cols-1);}}
+    for(let i=1;i<snake.length;i++)edges.add(edge(snake[i-1],snake[i]));best={edges,...solve(edges,cols,rows)};
+  }
+  const [l,r,n,f]=play,w=(r-l)/cols,h=(f-n)/rows,t=wall_mm/2,zones=[];
+  // Overlap wall ends at junctions and extend to the field edge: no corner gaps.
+  for(let y=0;y<rows;y++)for(let x=0;x<cols-1;x++)if(!best.edges.has(edge(y*cols+x,y*cols+x+1)))zones.push([l+(x+1)*w-t,l+(x+1)*w+t,n+y*h-t,n+(y+1)*h+t]);
+  for(let y=0;y<rows-1;y++)for(let x=0;x<cols;x++)if(!best.edges.has(edge(y*cols+x,(y+1)*cols+x)))zones.push([l+x*w-t,l+(x+1)*w+t,n+(y+1)*h-t,n+(y+1)*h+t]);
+  const centers=Array.from({length:count},(_,i)=>[l+(i%cols+.5)*w,n+(Math.floor(i/cols)+.5)*h]);
+  return {...settings,kind:'maze',difficulty,zones,edges:[...best.edges],solution:best.path,centers,dead_ends:best.deadEnds,
+    margin_mm:35,key:[cols,rows,...[...best.edges].sort()].join('|')};
+}
+// Segment/core intersection catches walls crossed between two fresh radar samples.
+function crossesWall(a,b,box,margin=35){
+  let lo=0,hi=1;
+  for(const [origin,delta,min,max] of [[a.x,b.x-a.x,box[0]+margin,box[1]-margin],[a.y,b.y-a.y,box[2]+margin,box[3]-margin]]){
+    if(min>max)return false;
+    if(delta===0){if(origin<min||origin>max)return false;continue;}
+    const p=(min-origin)/delta,q=(max-origin)/delta;lo=Math.max(lo,Math.min(p,q));hi=Math.min(hi,Math.max(p,q));if(lo>hi)return false;
+  }
+  return true;
+}
+
+return {mazeSettings,makeMaze,crossesWall};})();
+modules.engine=(()=>{const {rectangularField}=modules.spatial;const {mazeSettings,makeMaze,crossesWall}=modules.maze;
+// Team 2 game authority. Pure JavaScript for Node or browser modules.
+const DEFAULTS={round_s:180,penalty_s:5,max_anomalies:3,layout_mode:'random',overlap_s:.6,cooldown_s:1,fault_s:1,sample_fresh_s:.45,patrol_period_s:16,...rectangularField(),mirror_x:false,difficulty:'hard',zone_width:600,zone_y:[2400,3400],patrol_x:1200,boundary_margin_mm:0,zone_margin_mm:100};
+const makeLayout=makeMaze;
+const inside=(x,y,[left,right,near,far],margin=0)=>x>=left+margin&&x<=right-margin&&y>=near+margin&&y<=far-margin;
+class Game {
+  constructor(now,config={}) {
+    Object.assign(this,{cfg:{...DEFAULTS,...config},state:'idle',suspicion:0,penalties:0,events:[],last_tick:now,started:null,last_sample:null,boot:null,seq:-1,point:null,targets:[],bad_since:null,overlap_since:null,out_since:null,armed:true,setup_checked:false,round_id:null,reason:'',tripwire_seen:[],last_beat:0});
+    if(this.cfg.layout_mode==='random')Object.assign(this.cfg,mazeSettings(this.cfg.play,this.cfg.difficulty));
+    this.maze_contact=false;this.elapsed_s=0;this.remaining=this.cfg.round_s;this.layout=null;this.guidance='stop';this.guidance_until=0;
+  }
+  event(name,now,data={}) {this.events.push({event:name,at:Math.round(now*1000)/1000,round_id:this.round_id,...data});this.events=this.events.slice(-1000);}
+  ingest(data,now) {
+    this.tick(now);
+    const seq=data.radar_seq,boot=String(data.radar_boot??'legacy');
+    if(!Number.isSafeInteger(seq)||seq<0||(boot===this.boot&&seq<=this.seq))return false;
+    if(this.boot!==null&&boot!==this.boot&&this.state==='running')this.finish('fault','Radar restarted during the round',now);
+    this.boot=boot;this.seq=seq;this.last_sample=now;this.targets=data.targets??[];
+    const x=data.radar_x_mm*(this.cfg.mirror_x?-1:1),y=data.radar_y_mm;
+    const valid=data.radar_valid===true&&Number.isFinite(data.radar_x_mm)&&Number.isFinite(x)&&Number.isFinite(y)&&inside(x,y,this.cfg.play);
+    if(valid&&this.state==='running'&&this.layout?.kind==='maze'&&this.point&&this.last_valid_at!==undefined&&now-this.last_valid_at<=this.cfg.sample_fresh_s) {
+      this.maze_contact ||= this.layout.zones.some(z=>crossesWall(this.point,{x,y},z,this.layout.margin_mm));
+    }
+    this.point=valid?{x,y}:null;this.last_valid_at=valid?now:undefined;
+    if(!valid){this.bad_since??=now;this.overlap_since=null;this.out_since=null;}else this.bad_since=null;
+    return true;
+  }
+  fresh(now){return this.point!==null&&this.last_sample!==null&&now-this.last_sample<=this.cfg.sample_fresh_s;}
+  zone(now){const elapsed=this.started===null?0:Math.max(0,now-this.started),c=this.cfg.patrol_x*Math.sin(2*Math.PI*elapsed/this.cfg.patrol_period_s);return[c-this.cfg.zone_width/2,c+this.cfg.zone_width/2,...this.cfg.zone_y];}
+  zones(now){return this.cfg.layout_mode==='patrol'?[this.zone(now)]:(this.layout?.zones??[]);}
+  guide(direction,now){
+    this.tick(now);
+    if(this.state!=='running')throw Error('Guidance is available during a running round.');
+    if(!['left','right','forward','back','stop'].includes(direction))throw Error('Unknown direction');
+    this.guidance=direction;this.guidance_until=now+1;
+  }
+  signal(now){return this.state==='running'&&this.fresh(now)&&now<this.guidance_until?this.guidance:'stop';}
+  field(width,depth,near,mirror=false){
+    if(this.state!=='idle')throw Error('Reset before changing the field.');
+    Object.assign(this.cfg,rectangularField(width,depth,near),{mirror_x:mirror===true});
+    if(this.cfg.layout_mode==='random')Object.assign(this.cfg,mazeSettings(this.cfg.play,this.cfg.difficulty));
+    this.setup_checked=false;this.point=null;this.layout=null;
+  }
+  difficulty(level){
+    if(this.state!=='idle')throw Error('Reset before changing maze difficulty.');
+    const geometry=mazeSettings(this.cfg.play,level);Object.assign(this.cfg,geometry,{difficulty:level});
+    this.setup_checked=false;this.point=null;this.layout=null;
+  }
+  rules(limit,penalty){
+    if(this.state!=='idle')throw Error('Rules can only change before a round.');
+    if(!Number.isInteger(limit)||limit<1||limit>10||!Number.isFinite(penalty)||penalty<1||penalty>60)throw Error('Use 1–10 anomalies and a 1–60 second penalty.');
+    this.cfg.max_anomalies=limit;this.cfg.penalty_s=penalty;
+  }
+  start(now){
+    if(this.state!=='idle')throw Error('Only the facilitator can reset a finished or faulted attempt.');
+    if(!this.setup_checked)throw Error('Facilitator must check the floor layout and enable the round first.');
+    if(!this.fresh(now)||!inside(this.point.x,this.point.y,this.cfg.start))throw Error('Exactly one tracked infiltrator must stand in the marked start region.');
+    if(this.cfg.layout_mode==='random'){let next=makeLayout(Math.random,this.cfg.play,this.cfg.difficulty);for(let i=0;i<20&&next.key===this.previous_layout;i++)next=makeLayout(Math.random,this.cfg.play,this.cfg.difficulty);this.layout=next;this.previous_layout=next.key;}
+    this.maze_contact=false;this.state='running';this.started=now;this.last_tick=now;this.round_id=globalThis.crypto.randomUUID().replaceAll('-','').slice(0,10);this.event('start',now,{layout:this.layout?.key});
+  }
+  finish(state,reason,now){this.state=state;this.reason=reason;this.event(state,now,{reason,remaining_s:Math.round(this.remaining*1000)/1000,penalties:this.penalties});}
+  reset(now){
+    if(this.state==='running')throw Error('Abort the active attempt before resetting.');
+    this.event('reset',now);Object.assign(this,{state:'idle',remaining:this.cfg.round_s,elapsed_s:0,suspicion:0,started:null,round_id:null,reason:'',penalties:0,armed:true,overlap_since:null,out_since:null,setup_checked:false,last_tick:now,tripwire_seen:[],layout:null,maze_contact:false,guidance:'stop',guidance_until:0});
+  }
+  tick(now){
+    const dt=Math.max(0,now-this.last_tick);this.last_tick=now;if(this.state!=='running')return;
+    this.elapsed_s+=dt;this.remaining=Math.max(0,this.remaining-dt);
+    if(this.last_sample===null||now-this.last_sample>=this.cfg.fault_s||(this.bad_since!==null&&now-this.bad_since>=this.cfg.fault_s)){this.finish('fault','Tracking missing, stale or ambiguous for one second',now);return;}
+    if(this.remaining<=0){this.finish('lost','Time ran out',now);return;}
+    if(!this.fresh(now)){this.overlap_since=null;this.out_since=null;return;}
+    const {x,y}=this.point;
+    const zones=this.zones(now),maze=this.layout?.kind==='maze',margin=this.cfg.layout_mode==='patrol'?0:(this.layout?.margin_mm??this.cfg.zone_margin_mm);
+    const contact=this.maze_contact;this.maze_contact=false;
+    if(contact||zones.some(b=>inside(x,y,b,margin))){
+      this.out_since=null;this.overlap_since??=now;this.suspicion=Math.min(1,this.suspicion+dt/this.cfg.overlap_s);
+      if(this.armed&&(maze||now-this.overlap_since>=this.cfg.overlap_s)){this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;this.armed=false;this.event('penalty',now,{reason:maze?'maze wall crossed':'surveillance overlap',seconds:this.cfg.penalty_s});}
+    }else{
+      this.overlap_since=null;this.suspicion=Math.max(0,this.suspicion-dt/this.cfg.overlap_s);
+      if(zones.some(b=>inside(x,y,b,-margin)))this.out_since=null;
+      else{this.out_since??=now;if(now-this.out_since>=this.cfg.cooldown_s)this.armed=true;}
+    }
+    if(this.penalties>=this.cfg.max_anomalies)this.finish('lost','Anomaly limit reached — bank lockdown',now);
+    else if(this.remaining<=0)this.finish('lost','Time ran out after a penalty',now);
+    else if(inside(x,y,this.cfg.goal,this.cfg.boundary_margin_mm))this.finish('won','Vault reached',now);
+  }
+  tripwire(beam,eventID,now){
+    const key=JSON.stringify([String(beam),String(eventID)]);
+    if(this.state!=='running'||this.tripwire_seen.includes(key))return false;
+    this.tripwire_seen.push(key);this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;
+    this.event('penalty',now,{reason:'tripwire',beam:String(beam),seconds:this.cfg.penalty_s});if(this.penalties>=this.cfg.max_anomalies)this.finish('lost','Anomaly limit reached — bank lockdown',now);else if(this.remaining===0)this.finish('lost','Time ran out after tripwire',now);return true;
+  }
+  snapshot(now){return{state:this.state,tick:Math.floor(this.elapsed_s),toggle:this.state==='running',remaining_s:Math.round(this.remaining*1000)/1000,suspicion:Math.round(this.suspicion*1000)/1000,penalties:this.penalties,valid:this.fresh(now),point:this.fresh(now)?this.point:null,zone:this.zone(now),zones:this.zones(now),layout_id:this.layout?.key??null,maze:this.layout?.kind==='maze'?{cols:this.layout.cols,rows:this.layout.rows,difficulty:this.layout.difficulty,dead_ends:this.layout.dead_ends}:null,guidance:this.signal(now),config:this.cfg,reason:this.reason,round_id:this.round_id,setup_checked:this.setup_checked,sample_age_s:this.last_sample===null?null:now-this.last_sample,events:this.events.slice(-12)};}
+}
+
+return {Game,DEFAULTS,makeLayout,inside};})();
+modules.controller=(()=>{const {Game}=modules.engine;
+// The controller is independent of DOM, clocks and network implementation.
+class Controller {
+  constructor(now=0, session=crypto.randomUUID()) {
+    this.session=session;this.game=new Game(now);this.mode='demo';this.camera='';
+    this.connected=false;this.conflict=false;this.quietUntil=0;this.beat=0;
+    this.supported=true;this.led='simulated';this.cameras=new Map();
+  }
+  fault(reason,now){if(this.game.state==='running')this.game.finish('fault',reason,now);this.game.guidance='stop';this.game.guidance_until=0;}
+  live(now){this.fault('Connection changed',now);const priorFault=this.game.state==='fault'?this.game.reason:null;this.mode='live';this.connected=false;this.conflict=false;this.camera='';this.cameras.clear();this.game.reset(now);if(priorFault)this.game.finish('fault',priorFault,now);this.game.point=null;this.game.last_sample=null;this.supported=false;this.led='Not reported over OOCSI';}
+  receive(e,now) {
+    const d=e.data;
+    if(d.toktik_session&&d.toktik_session!==this.session){
+      this.conflict=true;this.quietUntil=now+3;this.fault('Another controller is on this channel. Close it before resetting.',now);return;
+    }
+    if(typeof e.sender!=='string'||!Number.isSafeInteger(d.radar_seq)||typeof d.radar_boot!=='string')return;
+    this.cameras.set(e.sender,{at:now,boot:d.radar_boot});
+    if(e.sender!==this.camera)return;
+    this.game.ingest(d,now);this.supported=d.guidance_supported===true;
+  }
+  selectCamera(name,now){if(this.game.state==='running')throw Error('Abort before changing cameras.');this.camera=name;this.game.point=null;this.game.last_sample=null;this.game.boot=null;this.game.seq=-1;this.game.setup_checked=false;}
+  start(now){if(this.mode==='live'&&(!this.connected||this.conflict||now<this.quietUntil||!this.camera))throw Error('Connect, select a camera and resolve any controller conflict first.');this.game.start(now);}
+  reset(now){if(this.mode==='live'&&now<this.quietUntil)throw Error('Another controller is still broadcasting. Close it and wait three seconds.');this.game.reset(now);this.conflict=false;}
+  heartbeat(now){
+    if(this.mode!=='live'||!this.connected||this.conflict||now<this.quietUntil)return null;
+    const s=this.game.snapshot(now);
+    return {toktik_session:this.session,toktik_beat:++this.beat,toktik_state:s.state,toktik_time_s:s.remaining_s,
+      toktik_suspicion:s.suspicion,toktik_penalties:s.penalties,toktik_ready:s.setup_checked,
+      toktik_guide:this.game.signal(now),toktik_play:s.config.play,toktik_start:s.config.start,toktik_goal:s.config.goal,
+      toktik_mirror_x:s.config.mirror_x,toktik_zones:s.zones,toktik_max_anomalies:s.config.max_anomalies,
+      toktik_tick:s.tick,toktik_toggle:s.toggle,toktik_round_id:s.round_id,toktik_camera:this.camera};
+  }
+}
+
+return {Controller};})();
+modules.connection=(()=>{
+// OOCSI WebSocket framing matches the vendored oocsi-web.js client.
+// Deliberately no offline send queue: expired guidance must never be replayed.
+function validChannel(value) {
+  if (!/^[A-Za-z0-9_/-]{1,90}$/.test(value)) throw Error('Use a channel of 1–90 letters, digits, /, _ or -.');
+  return value;
+}
+class Connection {
+  constructor({socketFactory=url=>new WebSocket(url), onMessage=()=>{}, onStatus=()=>{}}={}) {
+    Object.assign(this,{socketFactory,onMessage,onStatus,socket:null,connected:false});
+  }
+  connect(channel, name) {
+    this.close(); this.channel=validChannel(channel); this.name=name;
+    const socket=this.socket=this.socketFactory('wss://oocsi.id.tue.nl/ws');
+    this.onStatus('connecting');
+    socket.onopen=()=>{
+      if(this.socket!==socket)return;
+      socket.send(name); socket.send('subscribe '+channel);
+      this.connected=true; this.onStatus('connected');
+    };
+    socket.onmessage=event=>{
+      if(this.socket!==socket)return;
+      if(event.data==='ping'){socket.send('.');return;}
+      try {const e=JSON.parse(event.data);if(e.recipient===channel&&e.data&&typeof e.data==='object'&&!Array.isArray(e.data))this.onMessage(e);} catch {/* Ignore protocol notices and malformed packets. */}
+    };
+    socket.onerror=()=>{if(this.socket===socket)this.onStatus('error');};
+    socket.onclose=()=>{if(this.socket===socket){this.connected=false;this.onStatus('disconnected');}};
+  }
+  send(data) {if(this.connected&&this.socket?.readyState===1)this.socket.send('sendjson '+this.channel+' '+JSON.stringify(data));}
+  close() {const old=this.socket;this.socket=null;this.connected=false;old?.close();}
+}
+
+return {validChannel};})();
+modules.things=(()=>{
+// Adapter for the course's unmodified OOCSI Things library.
+function teamChannel(team) {
+  const slug=team.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'').replace(/^-+|-+$/g,'');
+  if(!slug||slug.length>70)throw Error('Choose a team name containing letters or digits (up to 70 characters after normalization).');
+  return 'OOCSI-things/'+slug;
+}
+const outputs=['state','time_s','suspicion','penalties','guide','round_id','tick','toggle'];
+class ThingsConnection {
+  constructor({onMessage=()=>{},onStatus=()=>{},things=globalThis.oocsiThings,oocsi=globalThis.OOCSI,
+    every=(fn,ms)=>setInterval(fn,ms),leave=()=>{location.search='?demo=1';}}={}) {
+    Object.assign(this,{onMessage,onStatus,things,oocsi,every,leave,connected:false,started:false,variables:{}});
+  }
+  connect(channel) {
+    if(!this.things){location.search='';return;}
+    if(this.started)return;
+    this.channel=channel;this.started=true;this.onStatus('connecting');
+    this.things.register('Bank Heist','toktik',['x_mm','y_mm','valid'],outputs);
+    for(const key of ['x_mm','y_mm','valid']){
+      this.things.data(key);this.things.link('radar',key);
+    }
+    for(const key of outputs)this.variables[key]=this.things.data(key);
+    // Gameplay uses whole source messages, never separately linked coordinates.
+    this.things.subscribe(e=>this.onMessage(e));
+    this.every(()=>{
+      const connected=this.oocsi.isConnected();
+      if(connected!==this.connected){this.connected=connected;this.onStatus(connected?'connected':'disconnected');}
+    },100);
+  }
+  send(data){
+    if(!this.connected||!this.oocsi.isConnected())return;
+    // Atomic 5 Hz heartbeat keeps sequence, state and guidance coherent for firmware.
+    this.oocsi.send(this.channel,data);
+    // Course variables expose the same fields to other Things and their link() API.
+    for(const key of outputs)this.variables[key](data['toktik_'+key]);
+  }
+  close(){
+    if(!this.started)return;
+    // The stock client reconnects automatically. Unload it to truly disconnect.
+    this.connected=false;this.leave();
+  }
+}
+
+return {ThingsConnection,teamChannel};})();
+
+function boot(){
+  if(window.toktikBooted)return;window.toktikBooted=true;
+  document.body.classList.add('ready');
+  const runtime=(()=>{const {Controller}=modules.controller;const {validChannel}=modules.connection;const Connection=modules.things.ThingsConnection;
+  
+const $=id=>document.getElementById(id),now=()=>performance.now()/1000;
+const controller=new Controller(now());
+let seq=0, demoPoint={x:-900,y:1800},lastBeat=0,lastFrame=now(),lastState='idle',status='Offline demo. No network connection.',storageOK=true;
+const storage={get(key){try{return sessionStorage.getItem(key);}catch{storageOK=false;return null;}},set(key,value){try{sessionStorage.setItem(key,value);}catch{storageOK=false;}}};
+if(['running','fault'].includes(storage.get('toktik-attempt')))controller.game.finish('fault','Previous attempt interrupted. Inspect and reset.',now());
+$('channel').value=window.courseChannel||storage.get('toktik-channel')||'OOCSI-things/team-2';
+storage.set('toktik-channel',$('channel').value);
+$('channel').addEventListener('change',()=>storage.set('toktik-channel',$('channel').value));
+const connection=new Connection({onMessage:e=>controller.receive(e,now()),onStatus:s=>{
+  controller.connected=s==='connected';
+  status={connecting:'Connecting to OOCSI…',connected:'Connected. Select your camera and check the field.',disconnected:'Connection lost. Reconnect manually; the attempt will not resume.',error:'OOCSI connection failed. Check your internet connection.'}[s];
+  if(s==='connected')controller.quietUntil=now()+3;
+  if(s==='disconnected'||s==='error')controller.fault('OOCSI connection lost',now());
+}});
+function report(fn){try{fn();$('actionError').textContent='';}catch(e){$('actionError').textContent=e.message;}}
+function stop(reason){controller.fault(reason,now());sendBeat();persist();}
+function persist(){storage.set('toktik-attempt',controller.game.state);lastState=controller.game.state;}
+function sendBeat(){const beat=controller.heartbeat(now());if(beat)connection.send(beat);}
+function demoSample(){controller.game.ingest({radar_seq:++seq,radar_boot:'demo',radar_valid:true,radar_x_mm:demoPoint.x,radar_y_mm:demoPoint.y},now());}
+function returnToStart(){const [l,r,n,f]=controller.game.cfg.start;demoPoint={x:(l+r)/2,y:(n+f)/2};}
+function move(direction){if(controller.mode!=='demo')return;const step=100;demoPoint.x+=direction==='left'?-step:direction==='right'?step:0;demoPoint.y+=direction==='up'?step:direction==='down'?-step:0;const [l,r,n,f]=controller.game.cfg.play;demoPoint.x=Math.max(l,Math.min(r,demoPoint.x));demoPoint.y=Math.max(n,Math.min(f,demoPoint.y));demoSample();}
+
+$('connect').onclick=()=>report(()=>{
+  if(controller.game.state==='running')throw Error('Abort before changing connectivity.');
+  const channel=validChannel($('channel').value.trim());
+  connection.close();controller.live(now());controller.quietUntil=now()+3;
+  storage.set('toktik-channel',channel);connection.connect(channel,'toktik_browser_'+controller.session);
+  $('ready').checked=false;persist();
+});
+$('disconnect').onclick=()=>{stop('Controller disconnected');connection.close();controller.connected=false;status='Disconnected. Reconnect or try the offline demo.';};
+$('demo').onclick=()=>report(()=>{
+  if(controller.game.state==='running')throw Error('Abort before switching to demo.');
+  connection.close();controller.connected=false;controller.mode='demo';controller.conflict=false;controller.supported=true;controller.led='simulated';
+  controller.game.reset(now());controller.game.boot=null;controller.game.seq=-1;controller.game.last_sample=null;returnToStart();demoSample();$('ready').checked=false;status='Offline demo. No network connection.';persist();
+});
+$('camera').onchange=()=>report(()=>{controller.selectCamera($('camera').value,now());$('ready').checked=false;});
+$('apply').onclick=()=>report(()=>{
+  // Validate on a temporary game to avoid partially applied forms.
+  const candidate=new Controller(now()).game;
+  candidate.field(+$('fieldWidth').value,+$('fieldDepth').value,+$('fieldNear').value,$('mirrorX').checked);
+  candidate.difficulty($('difficulty').value);
+  candidate.rules(+$('limit').value,+$('penalty').value);
+  controller.game.field(+$('fieldWidth').value,+$('fieldDepth').value,+$('fieldNear').value,$('mirrorX').checked);
+  controller.game.difficulty($('difficulty').value);
+  controller.game.rules(+$('limit').value,+$('penalty').value);$('ready').checked=false;returnToStart();
+});
+$('ready').onchange=()=>report(()=>{if(controller.game.state!=='idle'){$('ready').checked=controller.game.setup_checked;throw Error('Reset before checking the setup.');}controller.game.setup_checked=$('ready').checked;});
+$('abort').onclick=()=>stop('Round aborted by facilitator');
+$('reset').onclick=()=>report(()=>{controller.reset(now());$('ready').checked=false;persist();});
+$('demoStart').onclick=()=>{returnToStart();demoSample();};
+document.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>move(b.dataset.move));
+document.addEventListener('keydown',e=>{if(/INPUT|SELECT|TEXTAREA|BUTTON/.test(e.target.tagName))return;const directions={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down'};if(directions[e.key]&&controller.mode==='demo'){e.preventDefault();move(directions[e.key]);}});
+
+// A browser cannot promise background execution. Losing visibility invalidates play.
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stop('Controller tab hidden. Keep it visible during play.');});
+window.addEventListener('pagehide',()=>stop('Controller page closed'));
+window.addEventListener('blur',()=>{controller.game.guidance='stop';controller.game.guidance_until=0;sendBeat();});
+
+$('configureCamera').onclick=async()=>{
+  let port,writer;const button=$('configureCamera');button.disabled=true;
+  try {
+    if(controller.game.state==='running')throw Error('Abort before configuring the camera.');
+    if(!navigator.serial)throw Error('Use Chrome or Edge on a computer over HTTPS (or localhost) for USB setup.');
+    const channel=validChannel($('channel').value.trim()),ssid=$('ssid').value,password=$('wifiPassword').value;
+    if(!ssid||new TextEncoder().encode(ssid).length>32||new TextEncoder().encode(password).length>64)throw Error('Use a Wi-Fi name of 1–32 bytes and a password of up to 64 bytes.');
+    port=await navigator.serial.requestPort();await port.open({baudRate:115200});writer=port.writable.getWriter();
+    await writer.write(new TextEncoder().encode(JSON.stringify({command:'wifi_config',ssid,password,channel,enabled:$('shareCamera').checked})+'\n'));
+    $('cameraStatus').textContent='Settings sent. The camera should restart. Connect to OOCSI and verify that it appears; USB write success alone does not confirm Wi-Fi connectivity.';
+  }catch(e){$('cameraStatus').textContent=e.message;}
+  finally{$('wifiPassword').value='';writer?.releaseLock();if(port)try{await port.close();}catch{}button.disabled=false;}
+};
+
+function refreshSetup(t){
+  const live=controller.mode==='live',running=controller.game.state==='running';
+  $('modeBadge').textContent=live?'LIVE OOCSI':'OFFLINE DEMO';$('demoControls').hidden=live;
+  $('sessionStatus').textContent=controller.conflict?'Controller conflict. Close other controllers (including the USB service), wait three seconds, then reset.':status;
+  if(!storageOK)$('sessionStatus').textContent+=' Session storage unavailable: reload recovery cannot be recorded.';
+  $('connect').disabled=running||controller.connected;$('disconnect').disabled=!controller.connected;
+  $('channel').disabled=controller.connected||running;$('camera').disabled=running||!controller.connected;
+  $('ready').disabled=controller.game.state!=='idle';$('apply').disabled=controller.game.state!=='idle';
+  const cameras=[...controller.cameras].filter(([,v])=>t-v.at<3).map(([name])=>name);
+  if(controller.camera&&!cameras.includes(controller.camera))cameras.push(controller.camera);
+  const key=cameras.join('|');if($('camera').dataset.list!==key){$('camera').dataset.list=key;$('camera').replaceChildren(new Option('Select a camera',''),...cameras.map(name=>new Option(name,name)));$('camera').value=controller.camera;}
+}
+setInterval(()=>{
+  const t=now();
+  if(t-lastFrame>1&&controller.game.state==='running')controller.fault('Controller suspended for over one second',t);
+  lastFrame=t;
+  if(controller.mode==='demo'&&!document.hidden)demoSample();
+  controller.game.tick(t);
+  if(controller.game.state!==lastState)persist();
+  if(t-lastBeat>=.2){sendBeat();lastBeat=t;}
+  refreshSetup(t);
+},50);
+const runtime={
+  async requestState(){const t=now();return {ok:true,json:async()=>({game:controller.game.snapshot(t),connected:controller.connected,
+    fresh:controller.game.fresh(t),guidance_supported:controller.supported,led:controller.led,
+    network:{enabled:controller.mode==='live',connected:controller.connected,channel:connection.channel||''}})};},
+  async requestAction({action,direction}){let error;try{if(action==='start')controller.start(now());else if(action==='guide')controller.game.guide(direction,now());else throw Error('Unknown action');persist();sendBeat();}catch(e){error=e.message;}return {ok:!error,json:async()=>error?{error}:{ok:true}};}
+};
+
+  return runtime;})();
+  (()=>{const {mapProjection}=modules.spatial;const $=id=>document.getElementById(id);
+let snapshot=null,audio=null,sound=false,lastEvent=null;
+function beep(freq=440){if(!sound)return;audio??=new AudioContext();const o=audio.createOscillator(),g=audio.createGain();o.connect(g);g.connect(audio.destination);o.frequency.value=freq;g.gain.setValueAtTime(.07,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.25);o.start();o.stop(audio.currentTime+.25)}
+function draw(){
+ if(!snapshot)return;const game=snapshot.game,c=$('map'),r=c.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+ c.width=r.width*dpr;c.height=r.height*dpr;const g=c.getContext('2d');g.scale(dpr,dpr);
+ const {point,scale}=mapProjection(game.config.play,r.width,r.height),[l,rr,n,f]=game.config.play;
+ function box(b,color,label){const [x,y]=point(b[0],b[3]);g.fillStyle=color+'22';g.strokeStyle=color;g.lineWidth=1.5;g.fillRect(x,y,(b[1]-b[0])*scale,(b[3]-b[2])*scale);g.strokeRect(x,y,(b[1]-b[0])*scale,(b[3]-b[2])*scale);g.fillStyle=color;g.font='bold 10px system-ui';g.fillText(label,x+4,y+13)}
+ const [ox,oy]=point(0,0);g.save();g.beginPath();const [bx,by]=point(l-200,f+200);g.rect(bx,by,(rr-l+400)*scale,(f+200)*scale);g.clip();g.setLineDash([5,5]);g.strokeStyle='#587081';g.beginPath();for(const sign of [-1,1]){g.moveTo(ox,oy);g.lineTo(...point(sign*6000*Math.sin(Math.PI/3),3000))}g.stroke();g.restore();
+ box(game.config.play,'#486677','PLAY AREA');g.strokeStyle='#233b4e';g.lineWidth=1;
+ for(let x=Math.ceil(l/500)*500;x<=rr;x+=500){g.beginPath();g.moveTo(...point(x,n));g.lineTo(...point(x,f));g.stroke()}
+ for(let y=Math.ceil(n/500)*500;y<=f;y+=500){g.beginPath();g.moveTo(...point(l,y));g.lineTo(...point(rr,y));g.stroke()}
+ for(const z of game.zones??[])box(z,'#ff6c75',game.maze?'':'RESTRICTED');box(game.config.start,'#8eb8d2','START');box(game.config.goal,'#79e6c4','VAULT');
+ g.fillStyle='#8aa1b6';g.font='11px system-ui';for(const y of [n,f]){const [x,p]=point(l,y);g.fillText((y/1000).toFixed(1)+' m',x-40,p)}
+ g.fillStyle='#79e6c4';g.beginPath();g.arc(ox,oy,5,0,Math.PI*2);g.fill();g.textAlign='center';g.fillText('RADAR (0, 0) · +Y ↑',ox,oy+20);g.textAlign='left';
+ if(game.valid&&game.point){const [x,y]=point(game.point.x,game.point.y);g.fillStyle='#75d5ff';g.beginPath();g.arc(x,y,7,0,Math.PI*2);g.fill();g.fillStyle='#e8f7ff';g.fillText('PLAYER ESTIMATE',x+10,y-8)}
+ else{g.fillStyle='#ffb391';g.fillText('No unambiguous player position',20,20)}
+ $('fieldSize').textContent=((rr-l)/1000).toFixed(1)+' × '+((f-n)/1000).toFixed(1)+' m play area';$('fieldDimensions').textContent='X '+l/1000+' to '+rr/1000+' m · Y '+n/1000+' to '+f/1000+' m. ';
+}
+async function update(){try{const response=await runtime.requestState();if(!response.ok)throw Error('Service unavailable');snapshot=await response.json();const g=snapshot.game,s=Math.ceil(g.remaining_s);$('timer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');$('phase').textContent=g.state.toUpperCase();$('suspicion').textContent=Math.round(g.suspicion*100)+'%';$('fill').style.width=(g.suspicion*100)+'%';$('tracking').textContent=g.valid?'One valid player':snapshot.fresh?'Missing / outside / ambiguous':'No fresh samples';$('position').textContent=g.point?`${(g.point.x/1000).toFixed(2)} / ${(g.point.y/1000).toFixed(2)} m`:'—';$('penalties').textContent=`${g.penalties} / ${g.config.max_anomalies}`;$('guideState').textContent=snapshot.guidance_supported?g.guidance.toUpperCase():'Waiting for compatible camera';$('mazeInfo').textContent=g.maze?`${g.maze.difficulty.toUpperCase()} | ${g.maze.cols} x ${g.maze.rows} maze | ${g.maze.dead_ends} dead ends. Find the route; red walls count even when crossed between samples.`:'A new winding maze is generated at START. Difficulty adapts to your field dimensions.';$('rulesText').textContent=`${g.maze?'Crossing a red wall':'A confirmed red-zone entry'} costs ${g.config.penalty_s} seconds. ${g.config.max_anomalies} anomalies trigger lockdown. Clear the zone for ${g.config.cooldown_s} second(s) before another strike. Tracking loss does not pause time.`;document.querySelectorAll('[data-guide]').forEach(b=>b.disabled=g.state!=='running'||!g.valid||!snapshot.guidance_supported);$('led').textContent=snapshot.led;$('networkStatus').textContent=g.valid?'● Tracking live':snapshot.connected?'● Network connected':'Offline / disconnected';$('networkStatus').className='badge '+(g.valid?'live':'bad');
+const texts={idle:[g.setup_checked?'Infiltrator to START':'Prepare the play area',g.setup_checked?'Stand inside the marked start region. The navigator starts the round.':'Facilitator: verify orientation, coverage and the marked layout before enabling play.'],running:[g.valid?'Guide your partner':'Tracking uncertain',g.valid?'Guide your partner through the safe route to the vault. Hold a direction to signal; release to STOP.':'Time continues. Return to reliable coverage; a one-second gap faults this attempt.'],won:['Vault reached','Heist complete. Ask the facilitator to reset for the next pair.'],lost:['Lockdown',g.reason+'. Ask the facilitator to reset the room.'],fault:['Attempt invalidated',g.reason+'. Facilitator inspection and reset required.']};[$('headline').textContent,$('message').textContent]=texts[g.state];const b=g.config.start,p=g.point,inStart=p&&p.x>=b[0]&&p.x<=b[1]&&p.y>=b[2]&&p.y<=b[3];$('start').disabled=!(g.state==='idle'&&g.setup_checked&&g.valid&&inStart);$('network').textContent=snapshot.network.enabled?`Public OOCSI ${snapshot.network.connected?'connected':'connecting'} · ${snapshot.network.channel}`:'Offline demo. No data is sent to OOCSI.';
+$('events').replaceChildren(...g.events.slice().reverse().map(e=>{let li=document.createElement('li');li.textContent=e.event.toUpperCase()+(e.reason?' · '+e.reason:'');return li}));const event=g.events.at(-1);if(event&&lastEvent!==event.at+event.event){if(lastEvent!==null)beep(event.event==='won'?880:event.event==='penalty'?220:440);lastEvent=event.at+event.event}draw();
+}catch(e){$('networkStatus').textContent='Toktik service disconnected';$('networkStatus').className='badge bad';$('start').disabled=true;$('headline').textContent='Connection lost';$('message').textContent='The controller is unavailable. Reconnect and inspect the setup before resetting.';snapshot=null;document.querySelectorAll('[data-guide]').forEach(b=>b.disabled=true);releaseGuide();const c=$('map');c.getContext('2d').clearRect(0,0,c.width,c.height);$('tracking').textContent='Unknown';$('position').textContent='—'}setTimeout(update,100)}
+$('start').onclick=async()=>{try{const r=await runtime.requestAction({action:'start'});const d=await r.json();$('actionError').textContent=d.error||''}catch(e){$('actionError').textContent=e.message}};
+$('sound').onclick=()=>{sound=!sound;$('sound').textContent=sound?'Sound on':'Sound off';if(sound)beep(660)};
+window.addEventListener('resize',draw);update();
+
+// Dead-man controls: renew while held; release/focus loss stops, and authority expires stale input.
+let heldGuide=null,guideTimer=null,guideBusy=false;
+async function sendGuide(direction){if(guideBusy&&direction!=='stop')return;guideBusy=true;try{const r=await runtime.requestAction({action:'guide',direction});const d=await r.json();if(d.error&&direction!=='stop')$('actionError').textContent=d.error;}catch(e){if(direction!=='stop')$('actionError').textContent='Guidance connection lost';}finally{guideBusy=false}}
+function releaseGuide(){if(!heldGuide)return;heldGuide=null;clearInterval(guideTimer);sendGuide('stop');}
+document.querySelectorAll('[data-guide]').forEach(b=>{b.style.touchAction='none';b.addEventListener('pointerdown',e=>{if(b.disabled)return;e.preventDefault();releaseGuide();heldGuide=b.dataset.guide;b.setPointerCapture(e.pointerId);sendGuide(heldGuide);guideTimer=setInterval(()=>heldGuide&&sendGuide(heldGuide),250);});b.addEventListener('pointerup',releaseGuide);b.addEventListener('pointercancel',releaseGuide);b.addEventListener('lostpointercapture',releaseGuide);b.addEventListener('keydown',e=>{if((e.key===' '||e.key==='Enter')&&!e.repeat&&!b.disabled){e.preventDefault();heldGuide=b.dataset.guide;sendGuide(heldGuide);guideTimer=setInterval(()=>heldGuide&&sendGuide(heldGuide),250);}});b.addEventListener('keyup',releaseGuide);b.addEventListener('blur',releaseGuide);});
+window.addEventListener('blur',releaseGuide);document.addEventListener('visibilitychange',()=>{if(document.hidden)releaseGuide()});
+})();
+  if(!demo){
+    document.getElementById('connect').click();
+    document.getElementById('connect').hidden=true;
+    document.getElementById('channel').readOnly=true;
+    document.body.style.overflow='auto';
+  }
+  document.getElementById('changeTeam').onclick=()=>{location.search='';};
+}
+window.thing=function(){window.courseChannel=window.getCourseChannel();boot();};
+if(demo)window.addEventListener('DOMContentLoaded',boot);
+</script></head><body><main>
+<header><div><div class="eyebrow">TEAM 2 / BANK HEIST</div><h1>Bank Heist. Guide the heist.</h1><p>One infiltrator. One navigator. Reach the vault before time runs out.</p></div><div id="networkStatus" class="badge">Connecting</div></header>
+<section class="card setup" aria-labelledby="setupTitle">
+  <div class="topline"><div><div class="eyebrow">OPEN · CONNECT · PLAY</div><h2 id="setupTitle">Your group's heist</h2></div><span id="modeBadge" class="badge">OFFLINE DEMO</span></div>
+  <p id="sessionStatus" role="status">Try the demo, or connect your group's camera over OOCSI.</p>
+  <div class="form-grid"><label>Team channel<input id="channel" placeholder="OOCSI-things/your-group-heist" maxlength="90"></label><label>Camera<select id="camera"><option value="">Connect to discover cameras</option></select></label></div>
+  <p class="small">Use a unique channel shared with your camera. OOCSI is public: positions, guidance and game state are visible to other server users.</p>
+  <div class="controls"><button id="connect" class="primary">Choose team and connect</button><button id="changeTeam">Change team</button><button id="disconnect" disabled>Disconnect</button><button id="demo">Try offline demo</button></div>
+  <details><summary>Field and round setup</summary><div class="form-grid">
+    <label>Width (mm)<input id="fieldWidth" type="number" value="3000" min="2100" max="3000"></label><label>Depth (mm)<input id="fieldDepth" type="number" value="2000" min="1800" max="3000"></label><label>Near edge (mm)<input id="fieldNear" type="number" value="1500" min="1500"></label><label><span><input id="mirrorX" type="checkbox"> Mirror X after a walk test</span></label>
+    <label>Maze difficulty<select id="difficulty"><option value="normal">Normal - winding maze</option><option value="hard" selected>Hard - longer route</option><option value="expert">Expert - most passages</option></select></label><label>Anomaly limit<input id="limit" type="number" value="3" min="1" max="10"></label><label>Penalty (seconds)<input id="penalty" type="number" value="5" min="1" max="60"></label></div><button id="apply">Apply settings</button>
+  </details>
+  <label class="check"><input id="ready" type="checkbox"> I checked the floor layout, orientation and tracking (or I am using the demo).</label>
+  <div class="controls"><button id="abort">Abort round</button><button id="reset">Reset after inspection</button></div>
+
+  <details><summary>First-time camera Wi-Fi setup (Chrome / Edge on a computer)</summary><p>Flash the linked hardware firmware and attach its USB cable. Close other serial monitors. This sends settings directly to the camera; it does not install software.</p><div class="form-grid"><label>2.4 GHz Wi-Fi name<input id="ssid" autocomplete="off" maxlength="32"></label><label>Wi-Fi password<input id="wifiPassword" type="password" autocomplete="new-password" maxlength="64"></label></div><label class="check"><input id="shareCamera" type="checkbox"> Enable camera publishing to public OOCSI on the group channel above.</label><button id="configureCamera">Choose USB camera and save settings</button><p id="cameraStatus" role="status"></p></details>
+</section>
+<div class="layout"><section class="card"><div class="topline"><h2>Navigator’s surveillance map</h2><span class="label" id="fieldSize">Rectangular play area</span></div><div class="legend"><span><i class="dot" style="background:#75d5ff"></i>Infiltrator</span><span><i class="dot" style="background:#ff6c75"></i>Surveillance</span><span><i class="dot" style="background:#79e6c4"></i>Vault</span></div>  <div id="demoControls"><p>Demo: move the simulated player with these buttons or your arrow keys. Start in the blue region, then follow the safe route.</p><div class="controls"><button data-move="left">Map left</button><button data-move="up">Map up</button><button data-move="down">Map down</button><button data-move="right">Map right</button><button id="demoStart">Return to start</button></div></div><p class="small" id="mazeInfo">A new winding maze is generated each round. Red walls hide the correct route among wrong turns.</p><canvas class="map" id="map" aria-label="Top-down map of infiltrator, restricted zones, start and vault"></canvas><p class="small"><span id="fieldDimensions"></span><br>One metre uses the same screen distance on both axes. Dashed lines show nominal ±60° coverage, not measured accuracy. Only the navigator sees this map.</p></section>
+<section class="card"><div class="topline"><span class="label">Time until lockdown</span><span id="phase" class="badge">IDLE</span></div><div id="timer" class="timer">03:00</div><div class="topline"><span class="label">Suspicion</span><b id="suspicion">0%</b></div><div class="meter"><div id="fill"></div></div><div class="metric"><span>Tracking</span><b id="tracking">Waiting</b></div><div class="metric"><span>Position X / Y</span><b id="position">—</b></div><div class="metric"><span>Security anomalies</span><b id="penalties">0</b></div><div class="metric"><span>Camera LED report</span><b id="led">Off</b></div><div class="message" role="status"><strong id="headline">Prepare the play area</strong><span id="message">The facilitator checks the setup, then the infiltrator moves to START.</span></div><div class="controls"><button id="start" class="primary" disabled>Start the heist</button><button id="sound">Sound off</button></div><p class="small" id="rulesText">A confirmed red-zone entry costs 5 seconds. Three anomalies trigger lockdown. Clear the zone for one second before another strike can count. Tracking uncertainty lasting one second invalidates the attempt.</p><section aria-label="Guidance controls"><h2>Guide the infiltrator</h2><p class="small">Player faces the camera so they can see its LED. Left is screen-right (+X); right is screen-left (−X). Forward is toward the camera (−Y); back is away (+Y). Hold to signal; release to stop.</p><div class="controls"><button data-guide="left" disabled>Left · blue / 1 pulse</button><button data-guide="forward" disabled>Forward · green / 3 pulses</button><button data-guide="right" disabled>Right · blue / 2 pulses</button><button data-guide="back" disabled>Back · green / 4 pulses</button><button data-guide="stop" disabled>STOP · steady red</button></div><p>Requested signal: <strong id="guideState">STOP</strong></p><p class="small">Flashing amber means tracking or connection fault. Practise signals first. Keep facing the camera while stepping; mark the orientation on the floor.</p></section><div id="actionError" class="error small"></div></section></div>
+<div class="notice" id="network">Offline demo. Public OOCSI sharing is off.</div><details class="card" style="margin-top:20px"><summary>Round events</summary><ul id="events" class="events"></ul></details><footer><a href="" download="bank-heist.html">Download this module</a> · <span>Keep this controller visible during play · Position estimates need floor calibration</span><span><a href="https://github.com/beraltan/team-2-software-module/blob/main/docs/DIY.md">Setup guide</a> · <a href="https://github.com/beraltan/team-2-software-module/blob/main/docs/INTERFACE.md">Connect another module</a></span></footer></main><div id="courseHelp">Choose a team to share game data on public OOCSI. <a href="?demo=1">Try offline demo</a><p id="teamError" role="status"></p></div>
+<script>document.addEventListener('click',e=>{if(e.target.matches('#team-modal input[type=submit]')){try{modules.things.teamChannel(document.getElementById('team-choice').value);}catch(error){e.preventDefault();e.stopImmediatePropagation();document.getElementById('teamError').textContent=error.message;}}},true);</script></body></html>

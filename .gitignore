@@ -11,6 +11,7 @@ logs/
 __pycache__/
 *.py[cod]
 node_modules/
+test-output/
 build/
 .DS_Store
 Thumbs.db

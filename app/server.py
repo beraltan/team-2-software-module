@@ -267,7 +267,7 @@ class Handler(BaseHTTPRequestHandler):
                             calibration=CALIBRATION,calibration_summary=CALIBRATION_SUMMARY)
                 if not data['fresh']:data['targets']=[]
             self.respond(data);return
-        paths={'/':HERE/'index.html','/app.js':HERE/'app.js','/spatial.mjs':HERE/'spatial.mjs','/style.css':HERE/'style.css','/facilitator':HERE/'facilitator.html',
+        paths={'/':HERE/'usb.html','/app.js':HERE/'usb-app.js','/spatial.mjs':HERE/'spatial.mjs','/style.css':HERE/'style.css','/facilitator':HERE/'facilitator.html',
                '/radar':ROOT/'tools/radar_dashboard/index.html','/things':HERE/'things.html',
                '/vendor/oocsi-web.js':HERE/'vendor/oocsi-web.js','/vendor/oocsi-things.min.js':HERE/'vendor/oocsi-things.min.js'}
         file=paths.get(path)

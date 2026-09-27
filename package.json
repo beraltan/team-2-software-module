@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test app/test_heist.mjs app/test_spatial.mjs"
+    "build": "node tools/build-thing.mjs",
+    "start": "node tools/preview.mjs",
+    "test": "node tools/build-thing.mjs && node --test app/test_heist.mjs app/test_spatial.mjs app/test_browser.mjs app/test_things.mjs app/test_maze.mjs"
   },
   "engines": {
     "node": ">=22"

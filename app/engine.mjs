@@ -1,25 +1,14 @@
 import {rectangularField} from './spatial.mjs';
+import {mazeSettings,makeMaze,crossesWall} from './maze.mjs';
 // Team 2 game authority. Pure JavaScript for Node or browser modules.
-export const DEFAULTS={round_s:180,penalty_s:5,max_anomalies:3,layout_mode:'random',overlap_s:.6,cooldown_s:1,fault_s:1,sample_fresh_s:.45,patrol_period_s:16,...rectangularField(),mirror_x:false,grid_rows:3,zone_width:600,zone_y:[2400,3400],patrol_x:1200,boundary_margin_mm:0,zone_margin_mm:100};
-// Carve a connected, monotonic route in a 3-column grid. Each passage is
-// derived from the configured field before boundary tolerance; no diagonal-only connections.
-export function makeLayout(random=Math.random,play=DEFAULTS.play,rows=3) {
-  const [l,r,n,f]=play,w=(r-l)/3,h=(f-n)/rows;
-  const turns=[Math.floor(random()*rows),Math.floor(random()*rows)].sort((a,b)=>a-b);
-  const safe=new Set();let col=0;
-  for(let row=0;row<rows;row++){safe.add(`${col},${row}`);while(col<2&&turns[col]===row){col++;safe.add(`${col},${row}`);}}
-  const zones=[],route=[];
-  for(let row=0;row<rows;row++)for(let c=0;c<3;c++){
-    const b=[l+c*w,l+(c+1)*w,n+row*h,n+(row+1)*h];
-    (safe.has(`${c},${row}`)?route:zones).push(b);
-  }
-  return {zones,route,key:turns.join('-')};
-}
+export const DEFAULTS={round_s:180,penalty_s:5,max_anomalies:3,layout_mode:'random',overlap_s:.6,cooldown_s:1,fault_s:1,sample_fresh_s:.45,patrol_period_s:16,...rectangularField(),mirror_x:false,difficulty:'hard',zone_width:600,zone_y:[2400,3400],patrol_x:1200,boundary_margin_mm:0,zone_margin_mm:100};
+export const makeLayout=makeMaze;
 export const inside=(x,y,[left,right,near,far],margin=0)=>x>=left+margin&&x<=right-margin&&y>=near+margin&&y<=far-margin;
 export class Game {
   constructor(now,config={}) {
     Object.assign(this,{cfg:{...DEFAULTS,...config},state:'idle',suspicion:0,penalties:0,events:[],last_tick:now,started:null,last_sample:null,boot:null,seq:-1,point:null,targets:[],bad_since:null,overlap_since:null,out_since:null,armed:true,setup_checked:false,round_id:null,reason:'',tripwire_seen:[],last_beat:0});
-    this.elapsed_s=0;this.remaining=this.cfg.round_s;this.layout=null;this.guidance='stop';this.guidance_until=0;
+    if(this.cfg.layout_mode==='random')Object.assign(this.cfg,mazeSettings(this.cfg.play,this.cfg.difficulty));
+    this.maze_contact=false;this.elapsed_s=0;this.remaining=this.cfg.round_s;this.layout=null;this.guidance='stop';this.guidance_until=0;
   }
   event(name,now,data={}) {this.events.push({event:name,at:Math.round(now*1000)/1000,round_id:this.round_id,...data});this.events=this.events.slice(-1000);}
   ingest(data,now) {
@@ -30,7 +19,10 @@ export class Game {
     this.boot=boot;this.seq=seq;this.last_sample=now;this.targets=data.targets??[];
     const x=data.radar_x_mm*(this.cfg.mirror_x?-1:1),y=data.radar_y_mm;
     const valid=data.radar_valid===true&&Number.isFinite(data.radar_x_mm)&&Number.isFinite(x)&&Number.isFinite(y)&&inside(x,y,this.cfg.play);
-    this.point=valid?{x,y}:null;
+    if(valid&&this.state==='running'&&this.layout?.kind==='maze'&&this.point&&this.last_valid_at!==undefined&&now-this.last_valid_at<=this.cfg.sample_fresh_s) {
+      this.maze_contact ||= this.layout.zones.some(z=>crossesWall(this.point,{x,y},z,this.layout.margin_mm));
+    }
+    this.point=valid?{x,y}:null;this.last_valid_at=valid?now:undefined;
     if(!valid){this.bad_since??=now;this.overlap_since=null;this.out_since=null;}else this.bad_since=null;
     return true;
   }
@@ -47,6 +39,12 @@ export class Game {
   field(width,depth,near,mirror=false){
     if(this.state!=='idle')throw Error('Reset before changing the field.');
     Object.assign(this.cfg,rectangularField(width,depth,near),{mirror_x:mirror===true});
+    if(this.cfg.layout_mode==='random')Object.assign(this.cfg,mazeSettings(this.cfg.play,this.cfg.difficulty));
+    this.setup_checked=false;this.point=null;this.layout=null;
+  }
+  difficulty(level){
+    if(this.state!=='idle')throw Error('Reset before changing maze difficulty.');
+    const geometry=mazeSettings(this.cfg.play,level);Object.assign(this.cfg,geometry,{difficulty:level});
     this.setup_checked=false;this.point=null;this.layout=null;
   }
   rules(limit,penalty){
@@ -58,13 +56,13 @@ export class Game {
     if(this.state!=='idle')throw Error('Only the facilitator can reset a finished or faulted attempt.');
     if(!this.setup_checked)throw Error('Facilitator must check the floor layout and enable the round first.');
     if(!this.fresh(now)||!inside(this.point.x,this.point.y,this.cfg.start))throw Error('Exactly one tracked infiltrator must stand in the marked start region.');
-    if(this.cfg.layout_mode==='random'){let next=makeLayout(Math.random,this.cfg.play,this.cfg.grid_rows);for(let i=0;i<20&&next.key===this.previous_layout;i++)next=makeLayout(Math.random,this.cfg.play,this.cfg.grid_rows);this.layout=next;this.previous_layout=next.key;}
-    this.state='running';this.started=now;this.last_tick=now;this.round_id=globalThis.crypto.randomUUID().replaceAll('-','').slice(0,10);this.event('start',now,{layout:this.layout?.key});
+    if(this.cfg.layout_mode==='random'){let next=makeLayout(Math.random,this.cfg.play,this.cfg.difficulty);for(let i=0;i<20&&next.key===this.previous_layout;i++)next=makeLayout(Math.random,this.cfg.play,this.cfg.difficulty);this.layout=next;this.previous_layout=next.key;}
+    this.maze_contact=false;this.state='running';this.started=now;this.last_tick=now;this.round_id=globalThis.crypto.randomUUID().replaceAll('-','').slice(0,10);this.event('start',now,{layout:this.layout?.key});
   }
   finish(state,reason,now){this.state=state;this.reason=reason;this.event(state,now,{reason,remaining_s:Math.round(this.remaining*1000)/1000,penalties:this.penalties});}
   reset(now){
     if(this.state==='running')throw Error('Abort the active attempt before resetting.');
-    this.event('reset',now);Object.assign(this,{state:'idle',remaining:this.cfg.round_s,elapsed_s:0,suspicion:0,started:null,round_id:null,reason:'',penalties:0,armed:true,overlap_since:null,out_since:null,setup_checked:false,last_tick:now,tripwire_seen:[],layout:null,guidance:'stop',guidance_until:0});
+    this.event('reset',now);Object.assign(this,{state:'idle',remaining:this.cfg.round_s,elapsed_s:0,suspicion:0,started:null,round_id:null,reason:'',penalties:0,armed:true,overlap_since:null,out_since:null,setup_checked:false,last_tick:now,tripwire_seen:[],layout:null,maze_contact:false,guidance:'stop',guidance_until:0});
   }
   tick(now){
     const dt=Math.max(0,now-this.last_tick);this.last_tick=now;if(this.state!=='running')return;
@@ -73,10 +71,11 @@ export class Game {
     if(this.remaining<=0){this.finish('lost','Time ran out',now);return;}
     if(!this.fresh(now)){this.overlap_since=null;this.out_since=null;return;}
     const {x,y}=this.point;
-    const zones=this.zones(now),margin=this.cfg.layout_mode==='patrol'?0:this.cfg.zone_margin_mm;
-    if(zones.some(b=>inside(x,y,b,margin))){
+    const zones=this.zones(now),maze=this.layout?.kind==='maze',margin=this.cfg.layout_mode==='patrol'?0:(this.layout?.margin_mm??this.cfg.zone_margin_mm);
+    const contact=this.maze_contact;this.maze_contact=false;
+    if(contact||zones.some(b=>inside(x,y,b,margin))){
       this.out_since=null;this.overlap_since??=now;this.suspicion=Math.min(1,this.suspicion+dt/this.cfg.overlap_s);
-      if(this.armed&&now-this.overlap_since>=this.cfg.overlap_s){this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;this.armed=false;this.event('penalty',now,{reason:'surveillance overlap',seconds:this.cfg.penalty_s});}
+      if(this.armed&&(maze||now-this.overlap_since>=this.cfg.overlap_s)){this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;this.armed=false;this.event('penalty',now,{reason:maze?'maze wall crossed':'surveillance overlap',seconds:this.cfg.penalty_s});}
     }else{
       this.overlap_since=null;this.suspicion=Math.max(0,this.suspicion-dt/this.cfg.overlap_s);
       if(zones.some(b=>inside(x,y,b,-margin)))this.out_since=null;
@@ -92,5 +91,5 @@ export class Game {
     this.tripwire_seen.push(key);this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;
     this.event('penalty',now,{reason:'tripwire',beam:String(beam),seconds:this.cfg.penalty_s});if(this.penalties>=this.cfg.max_anomalies)this.finish('lost','Anomaly limit reached — bank lockdown',now);else if(this.remaining===0)this.finish('lost','Time ran out after tripwire',now);return true;
   }
-  snapshot(now){return{state:this.state,tick:Math.floor(this.elapsed_s),toggle:this.state==='running',remaining_s:Math.round(this.remaining*1000)/1000,suspicion:Math.round(this.suspicion*1000)/1000,penalties:this.penalties,valid:this.fresh(now),point:this.fresh(now)?this.point:null,zone:this.zone(now),zones:this.zones(now),layout_id:this.layout?.key??null,guidance:this.signal(now),config:this.cfg,reason:this.reason,round_id:this.round_id,setup_checked:this.setup_checked,sample_age_s:this.last_sample===null?null:now-this.last_sample,events:this.events.slice(-12)};}
+  snapshot(now){return{state:this.state,tick:Math.floor(this.elapsed_s),toggle:this.state==='running',remaining_s:Math.round(this.remaining*1000)/1000,suspicion:Math.round(this.suspicion*1000)/1000,penalties:this.penalties,valid:this.fresh(now),point:this.fresh(now)?this.point:null,zone:this.zone(now),zones:this.zones(now),layout_id:this.layout?.key??null,maze:this.layout?.kind==='maze'?{cols:this.layout.cols,rows:this.layout.rows,difficulty:this.layout.difficulty,dead_ends:this.layout.dead_ends}:null,guidance:this.signal(now),config:this.cfg,reason:this.reason,round_id:this.round_id,setup_checked:this.setup_checked,sample_age_s:this.last_sample===null?null:now-this.last_sample,events:this.events.slice(-12)};}
 }
