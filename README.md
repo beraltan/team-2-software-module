@@ -19,9 +19,9 @@ Live play needs internet, the compatible radar/ESP32/LED hardware and one visibl
 
 ## Interface
 
-Actual maze map from the hosted offline demo, shown in a 16:9 crop. The blue marker is the simulated player; red walls cause penalties and the green vault is the goal.
+Compact 16:9 presentation view of the working offline demo: maze, timer, status and directional guidance controls. Setup forms and long instructions are hidden for this capture; player and LED data are simulated.
 
-![Bank Heist maze map in the offline demo](docs/images/bank-heist-map.png)
+![Bank Heist maze, timer and guidance controls](docs/images/bank-heist-interface.png)
 
 ## Documentation
 
