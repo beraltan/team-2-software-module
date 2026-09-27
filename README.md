@@ -33,7 +33,6 @@ Compact 16:9 presentation view of the working offline demo: maze, timer, status 
 | Understand maze generation and difficulty | [Maze design](docs/MAZE.md) |
 | Connect hardware or another puzzle | [Messages and integration examples](docs/INTERFACE.md) |
 | Fix setup, connectivity or gameplay | [Troubleshooting](docs/TROUBLESHOOTING.md) |
-| Edit, build and test | [Development and repository map](docs/DEVELOPMENT.md) |
 | Use the earlier Python/USB tools | [USB diagnostics](docs/USB.md) |
 | See what has actually been tested | [Validation and remaining checks](docs/VALIDATION.md) |
 | Check credits and reuse terms | [Attribution and licence status](THIRD_PARTY.md) |
@@ -70,17 +69,10 @@ Normal, Hard and Expert offer winding passages and dead ends. Field dimensions l
 
 Keep **one controller per team**, visible with the screen awake. A hidden/suspended page, lost tracking or lost connection faults a running attempt. Reconnection never resumes that round automatically. Inspect and reset before trying again. Disconnecting the browser does not stop camera publishing.
 
-## For maintainers
+## Source code
 
-Edit `app/`, then regenerate the handover:
-
-```sh
-npm run build
-npm test
-npm start
-```
-
-Use Node 22+. No npm dependencies need installing. On Windows use `npm.cmd` if PowerShell blocks `npm.ps1`. Preview at http://localhost:8080. Optional Python tools use **uv**, `uv.lock` and `.venv`; see [development](docs/DEVELOPMENT.md).
+- [Complete standalone game](bank-heist.html) — HTML, CSS and JavaScript in one file.
+- [Source files](app/) — game logic, interface and hardware connections.
 
 ## Status and credits
 
