@@ -1,0 +1,16 @@
+# Local configuration and runtime data
+.env
+.env.*
+!.env.example
+logs/
+*.log
+*credentials*
+*secrets*
+.venv/
+.toolchain/
+__pycache__/
+*.py[cod]
+node_modules/
+build/
+.DS_Store
+Thumbs.db

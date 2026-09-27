@@ -1,0 +1,5 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {mapProjection,nominalCoverage,rectangularField} from './spatial.mjs';import {Game} from './engine.mjs';
+test('rectangle fits nominal sector and has independent width/depth',()=>{const f=rectangularField();assert.deepEqual(f.play,[-1500,1500,1500,3500]);for(const x of [-1500,1500])for(const y of [1500,3500])assert(nominalCoverage(x,y));assert(!nominalCoverage(4000,1000));assert.throws(()=>rectangularField(3000,3000,2000));});
+test('projection has identical metric scale on both axes and includes radar origin',()=>{const p=mapProjection(rectangularField().play,640,700);const o=p.point(0,0),x=p.point(1000,0),y=p.point(0,1000);assert(Math.abs(x[0]-o[0]-(o[1]-y[1]))<1e-8);assert(o[1]>=0&&o[1]<=700);assert(y[1]<o[1]);});
+test('configuration invalidates setup and mirror applies before gameplay',()=>{const g=new Game(0);g.setup_checked=true;g.field(2400,2400,1600,true);assert.equal(g.setup_checked,false);g.ingest({radar_seq:1,radar_boot:'test',radar_valid:true,radar_x_mm:800,radar_y_mm:1900},0);assert.equal(g.point.x,-800);g.state='running';assert.throws(()=>g.field(3000,2000,1500));});

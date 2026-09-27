@@ -1,0 +1,11 @@
+{
+  "name": "team-2-software-module",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test app/test_heist.mjs app/test_spatial.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
