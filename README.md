@@ -8,6 +8,8 @@
 
 ## Start here
 
+For USB-controlled simulated radar positions, see the [camera simulator controls](docs/CAMERA_SIMULATOR.md). ESP source and [Mac flashing instructions](https://github.com/beraltan/team-2-hardware-module/tree/main/firmware/Concept1_Camera#flash-from-a-mac) are in the hardware repo.
+
 You only need **bank-heist.html** to copy and run the software. It contains the application, styles and course libraries. Players do not need Python, Node or the rest of this repository.
 
 1. Download [bank-heist.html](bank-heist.html). On GitHub, open it and choose **Download raw file**.
