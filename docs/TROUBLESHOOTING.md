@@ -20,3 +20,6 @@
 | LEDs do not follow cues | Check compatible firmware, `guidance_supported`, channel, fresh heartbeats and valid tracking. The page cannot confirm optical LED output. |
 
 See [interface fields and timeouts](INTERFACE.md), [hosting](DATA_FOUNDRY.md) and [remaining physical checks](VALIDATION.md).
+## Extra hacker screen / controller conflict
+
+Keep one live hacker controller per team. A second browser tab, laptop or older USB controller can publish a competing session. Close the extra controller, wait until its messages stop, then use **Continue on this screen** in the connection banner. This clears the connection conflict without restarting a faulted module; reset that module deliberately if its attempt was interrupted. Opening **Offline demo** stops this screen's live connection. Keep extra previews offline while another screen controls the live hardware.

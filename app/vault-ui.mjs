@@ -1,0 +1,19 @@
+export function mountVaultPanel(root,{onCommand,onSelect,test=false}){
+  root.innerHTML=`<div class="vault-panel-head"><div><div class="eyebrow">VAULT / TWO SERVO LATCH</div><h2>${test?'Vault door test':'The vault door.'}</h2></div><span class="badge" data-vault-status>Waiting for ESP</span></div><div class="vault-panel-body"><div class="vault-seal" aria-hidden="true"><svg viewBox="0 0 100 100"><rect x="15" y="12" width="70" height="76" rx="4"/><circle cx="50" cy="50" r="25"/><circle cx="50" cy="50" r="6"/><path d="M50 44V29M55 53L68 62M45 53L32 62"/></svg></div><div class="vault-copy"><strong data-vault-command>Awaiting vault ESP</strong><p data-vault-rule>Unlocks automatically after all four modules pass. Prepare the latch before arming the next heist.</p><div class="vault-device"><label>Vault ESP<select data-vault-device><option value="">Waiting for device</option></select><span data-vault-name hidden></span></label><span data-vault-mode></span></div></div><div class="vault-servo-readings"><div><span>SERVO 1 · GPIO4</span><strong data-vault-angle="0">—</strong></div><div><span>SERVO 2 · GPIO5</span><strong data-vault-angle="1">—</strong></div></div></div><details class="vault-manual" ${test?'open':''}><summary>${test?'Test the real servos':'Presenter door controls'}</summary><p>These buttons move both real servos. Manual mode stays active until you choose Automatic.</p><div class="controls"><button data-vault-action="unlock">${test?'Test unlock':'Unlock latch'}</button><button data-vault-action="lock">${test?'Test lock':'Lock latch'}</button><button data-vault-action="auto">Automatic</button></div></details><p class="vault-feedback" data-vault-feedback role="status"></p><p class="small vault-measurement">Angles show generated servo commands. Door position is not measured.</p>`;
+  const q=s=>root.querySelector(s);let deviceKey='';
+  root.querySelectorAll('[data-vault-action]').forEach(b=>b.onclick=()=>onCommand(b.dataset.vaultAction));
+  q('[data-vault-device]').onchange=e=>onSelect(e.target.value);
+  return function render(v,{connected=false,demo=false,canControl=true,error=''}={}){
+    const d=v.data,online=demo||connected&&v.fresh;
+    q('[data-vault-status]').textContent=demo?'SIMULATED':online?'ESP CONNECTED':'ESP OFFLINE';
+    q('[data-vault-status]').className='badge '+(online?'live':'');
+    const title=!d?'Awaiting vault ESP':!online?'Vault ESP disconnected':d.motion==='error'?'Servo output error':d.motion==='moving'?(d.commanded==='unlock'?'Unlocking latch…':'Locking latch…'):d.commanded==='unlock'?'Unlock sweep finished':d.commanded==='lock'?'Lock sweep finished':'Ready for first command';
+    q('[data-vault-command]').textContent=title;root.dataset.command=online?d?.commanded||'none':'none';
+    q('[data-vault-mode]').textContent=d?(d.mode==='manual'?'Manual override':'Automatic heist control')+(d.controller_link==='conflict'?' · controller conflict':''):'';
+    const key=JSON.stringify([v.source,v.devices]);if(deviceKey!==key){deviceKey=key;q('[data-vault-device]').replaceChildren(new Option('Select vault ESP',''),...v.devices.map(x=>new Option(x.name+(x.fresh?'':' · offline'),x.name)));q('[data-vault-device]').value=v.source;}
+    const single=demo||v.devices.length===1&&!!v.source;q('[data-vault-device]').hidden=single;q('[data-vault-name]').hidden=!single;q('[data-vault-name]').textContent=demo?'Offline demo':v.source;
+    root.querySelectorAll('[data-vault-angle]').forEach((el,i)=>{el.textContent=d?d.angles[i]+'° → '+d.target_angles[i]+'°':'—';});
+    root.querySelectorAll('[data-vault-action]').forEach(b=>b.disabled=!online||!canControl);
+    q('[data-vault-feedback]').textContent=error||v.request||(!connected&&!demo?'Connect to Team 2 to discover the vault ESP.':!v.source&&v.devices.length>1?'Several vault ESPs found. Select the intended device.':!d?'Waiting for the direct ESP32-S3 vault sketch.':'');
+  };
+}

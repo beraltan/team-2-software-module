@@ -8,18 +8,21 @@ export class Game {
   constructor(now,config={}) {
     Object.assign(this,{cfg:{...DEFAULTS,...config},state:'idle',suspicion:0,penalties:0,events:[],last_tick:now,started:null,last_sample:null,boot:null,seq:-1,point:null,targets:[],bad_since:null,overlap_since:null,out_since:null,armed:true,setup_checked:false,round_id:null,reason:'',tripwire_seen:[],last_beat:0});
     if(this.cfg.layout_mode==='random')Object.assign(this.cfg,mazeSettings(this.cfg.play,this.cfg.difficulty));
-    this.maze_contact=false;this.elapsed_s=0;this.remaining=this.cfg.round_s;this.layout=null;this.guidance='stop';this.guidance_until=0;
+    this.maze_contact=false;this.elapsed_s=0;this.remaining=this.cfg.round_s;this.layout=null;this.guidance='stop';this.guidance_until=0;this.bypassed=false;this.laser_cuts=0;
+    this.heist_mode=false;this.navigation_complete=false;this.phase='navigation';this.phase_since=now;this.escape_bypassed=false;
   }
+  enableHeist(){this.heist_mode=true;this.cfg.round_s=600;this.remaining=600;}
+  needsTracking(){return !this.heist_mode||['navigation','escape'].includes(this.phase);}
   event(name,now,data={}) {this.events.push({event:name,at:Math.round(now*1000)/1000,round_id:this.round_id,...data});this.events=this.events.slice(-1000);}
   ingest(data,now) {
     this.tick(now);
     const seq=data.radar_seq,boot=String(data.radar_boot??'legacy');
     if(!Number.isSafeInteger(seq)||seq<0||(boot===this.boot&&seq<=this.seq))return false;
-    if(this.boot!==null&&boot!==this.boot&&this.state==='running')this.finish('fault','Radar restarted during the round',now);
+    if(this.boot!==null&&boot!==this.boot&&['armed','running'].includes(this.state)&&this.needsTracking())this.finish('fault','Radar restarted during the round',now);
     this.boot=boot;this.seq=seq;this.last_sample=now;this.targets=data.targets??[];
     const x=data.radar_x_mm*(this.cfg.mirror_x?-1:1),y=data.radar_y_mm;
     const valid=data.radar_valid===true&&Number.isFinite(data.radar_x_mm)&&Number.isFinite(x)&&Number.isFinite(y)&&inside(x,y,this.cfg.play);
-    if(valid&&this.state==='running'&&this.layout?.kind==='maze'&&this.point&&this.last_valid_at!==undefined&&now-this.last_valid_at<=this.cfg.sample_fresh_s) {
+    if(valid&&this.state==='running'&&this.needsTracking()&&this.layout?.kind==='maze'&&this.point&&this.last_valid_at!==undefined&&now-this.last_valid_at<=this.cfg.sample_fresh_s) {
       this.maze_contact ||= this.layout.zones.some(z=>crossesWall(this.point,{x,y},z,this.layout.margin_mm));
     }
     this.point=valid?{x,y}:null;this.last_valid_at=valid?now:undefined;
@@ -31,11 +34,11 @@ export class Game {
   zones(now){return this.cfg.layout_mode==='patrol'?[this.zone(now)]:(this.layout?.zones??[]);}
   guide(direction,now){
     this.tick(now);
-    if(this.state!=='running')throw Error('Guidance is available during a running round.');
+    if(this.state!=='running'||!this.needsTracking())throw Error('Directional guidance is available during entry and escape.');
     if(!['left','right','forward','back','stop'].includes(direction))throw Error('Unknown direction');
     this.guidance=direction;this.guidance_until=now+1;
   }
-  signal(now){return this.state==='running'&&this.fresh(now)&&now<this.guidance_until?this.guidance:'stop';}
+  signal(now){return this.state==='running'&&this.needsTracking()&&this.fresh(now)&&now<this.guidance_until?this.guidance:'stop';}
   field(width,depth,near,mirror=false){
     if(this.state!=='idle')throw Error('Reset before changing the field.');
     Object.assign(this.cfg,rectangularField(width,depth,near),{mirror_x:mirror===true});
@@ -54,21 +57,37 @@ export class Game {
   }
   start(now){
     if(this.state!=='idle')throw Error('Only the facilitator can reset a finished or faulted attempt.');
-    if(!this.setup_checked)throw Error('Facilitator must check the floor layout and enable the round first.');
-    if(!this.fresh(now)||!inside(this.point.x,this.point.y,this.cfg.start))throw Error('Exactly one tracked infiltrator must stand in the marked start region.');
+    if(!(this.heist_mode&&this.bypassed)){
+      if(!this.setup_checked)throw Error('Check the play area before arming the heist.');
+      if(!this.fresh(now)||!inside(this.point.x,this.point.y,this.cfg.start))throw Error('Exactly one tracked infiltrator must stand in the marked start region.');
+    }
     if(this.cfg.layout_mode==='random'){let next=makeLayout(Math.random,this.cfg.play,this.cfg.difficulty);for(let i=0;i<20&&next.key===this.previous_layout;i++)next=makeLayout(Math.random,this.cfg.play,this.cfg.difficulty);this.layout=next;this.previous_layout=next.key;}
-    this.maze_contact=false;this.state='running';this.started=now;this.last_tick=now;this.round_id=globalThis.crypto.randomUUID().replaceAll('-','').slice(0,10);this.event('start',now,{layout:this.layout?.key});
+    this.maze_contact=false;this.state=this.heist_mode&&!this.navigation_complete?'armed':'running';this.started=this.state==='armed'?null:now;this.last_tick=now;this.round_id=globalThis.crypto.randomUUID().replaceAll('-','').slice(0,10);this.event(this.state==='armed'?'arm':'start',now,{layout:this.layout?.key});
   }
-  finish(state,reason,now){this.state=state;this.reason=reason;this.event(state,now,{reason,remaining_s:Math.round(this.remaining*1000)/1000,penalties:this.penalties});}
+  finish(state,reason,now){this.state=state;this.reason=reason;this.event(state,now,{reason,remaining_s:Math.round(this.remaining*1000)/1000,penalties:this.penalties,bypassed:this.bypassed});}
+  bypass(now){
+    if(this.heist_mode){if(this.navigation_complete)return;this.navigation_complete=true;this.bypassed=true;this.guidance='stop';this.guidance_until=0;this.event('camera_complete',now,{bypassed:true});return;}
+    if(this.state==='won')return;
+    this.round_id??=globalThis.crypto.randomUUID().replaceAll('-','').slice(0,10);
+    this.bypassed=true;this.guidance='stop';this.guidance_until=0;
+    this.finish('won','Passed by presenter bypass',now);
+  }
   reset(now){
-    if(this.state==='running')throw Error('Abort the active attempt before resetting.');
-    this.event('reset',now);Object.assign(this,{state:'idle',remaining:this.cfg.round_s,elapsed_s:0,suspicion:0,started:null,round_id:null,reason:'',penalties:0,armed:true,overlap_since:null,out_since:null,setup_checked:false,last_tick:now,tripwire_seen:[],layout:null,maze_contact:false,guidance:'stop',guidance_until:0});
+    if(['armed','running'].includes(this.state))throw Error('Abort the active attempt before resetting.');
+    this.event('reset',now);Object.assign(this,{state:'idle',bypassed:false,laser_cuts:0,remaining:this.cfg.round_s,elapsed_s:0,suspicion:0,started:null,round_id:null,reason:'',penalties:0,armed:true,overlap_since:null,out_since:null,setup_checked:false,last_tick:now,tripwire_seen:[],layout:null,maze_contact:false,guidance:'stop',guidance_until:0,navigation_complete:false,phase:'navigation',phase_since:now,escape_bypassed:false});
   }
   tick(now){
-    const dt=Math.max(0,now-this.last_tick);this.last_tick=now;if(this.state!=='running')return;
+    const dt=Math.max(0,now-this.last_tick);this.last_tick=now;
+    if(this.state==='armed'){
+      if(!this.fresh(now)){if(this.last_sample===null||now-this.last_sample>=this.cfg.fault_s||(this.bad_since!==null&&now-this.bad_since>=this.cfg.fault_s))this.finish('fault','Tracking lost before departure',now);return;}
+      if(!inside(this.point.x,this.point.y,this.cfg.start)){this.state='running';this.started=now;this.event('start',now);}
+      return;
+    }
+    if(this.state!=='running')return;
     this.elapsed_s+=dt;this.remaining=Math.max(0,this.remaining-dt);
-    if(this.last_sample===null||now-this.last_sample>=this.cfg.fault_s||(this.bad_since!==null&&now-this.bad_since>=this.cfg.fault_s)){this.finish('fault','Tracking missing, stale or ambiguous for one second',now);return;}
     if(this.remaining<=0){this.finish('lost','Time ran out',now);return;}
+    if(!this.needsTracking()){this.suspicion=0;this.maze_contact=false;return;}
+    if((!this.heist_mode||this.phase!=='escape'||now-this.phase_since>=this.cfg.fault_s)&&(this.last_sample===null||now-this.last_sample>=this.cfg.fault_s||(this.bad_since!==null&&now-this.bad_since>=this.cfg.fault_s))){this.finish('fault','Tracking missing, stale or ambiguous for one second',now);return;}
     if(!this.fresh(now)){this.overlap_since=null;this.out_since=null;return;}
     const {x,y}=this.point;
     const zones=this.zones(now),maze=this.layout?.kind==='maze',margin=this.cfg.layout_mode==='patrol'?0:(this.layout?.margin_mm??this.cfg.zone_margin_mm);
@@ -83,13 +102,17 @@ export class Game {
     }
     if(this.penalties>=this.cfg.max_anomalies)this.finish('lost','Anomaly limit reached — bank lockdown',now);
     else if(this.remaining<=0)this.finish('lost','Time ran out after a penalty',now);
-    else if(inside(x,y,this.cfg.goal,this.cfg.boundary_margin_mm))this.finish('won','Vault reached',now);
+    else if(this.heist_mode){
+      if(this.phase==='navigation'&&!this.navigation_complete&&inside(x,y,this.cfg.goal,this.cfg.boundary_margin_mm)){this.navigation_complete=true;this.guidance='stop';this.guidance_until=0;this.event('camera_complete',now);}
+      else if(this.phase==='escape'&&inside(x,y,this.cfg.start,this.cfg.boundary_margin_mm))this.finish('won','Money recovered. Infiltrator back in the safe zone.',now);
+    }else if(inside(x,y,this.cfg.goal,this.cfg.boundary_margin_mm))this.finish('won','Vault reached',now);
   }
-  tripwire(beam,eventID,now){
-    const key=JSON.stringify([String(beam),String(eventID)]);
+  tripwire(beam,eventID,now,source='manual'){
+    this.tick(now);
+    const key=JSON.stringify([String(source),String(beam),String(eventID)]);
     if(this.state!=='running'||this.tripwire_seen.includes(key))return false;
-    this.tripwire_seen.push(key);this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;
-    this.event('penalty',now,{reason:'tripwire',beam:String(beam),seconds:this.cfg.penalty_s});if(this.penalties>=this.cfg.max_anomalies)this.finish('lost','Anomaly limit reached — bank lockdown',now);else if(this.remaining===0)this.finish('lost','Time ran out after tripwire',now);return true;
+    this.tripwire_seen.push(key);this.remaining=Math.max(0,this.remaining-this.cfg.penalty_s);this.penalties++;this.laser_cuts++;
+    this.event('penalty',now,{reason:'laser cut',beam:String(beam),source:String(source),seconds:this.cfg.penalty_s});if(this.penalties>=this.cfg.max_anomalies)this.finish('lost','Anomaly limit reached — bank lockdown',now);else if(this.remaining===0)this.finish('lost','Time ran out after laser cut',now);return true;
   }
-  snapshot(now){return{state:this.state,tick:Math.floor(this.elapsed_s),toggle:this.state==='running',remaining_s:Math.round(this.remaining*1000)/1000,suspicion:Math.round(this.suspicion*1000)/1000,penalties:this.penalties,valid:this.fresh(now),point:this.fresh(now)?this.point:null,zone:this.zone(now),zones:this.zones(now),layout_id:this.layout?.key??null,maze:this.layout?.kind==='maze'?{cols:this.layout.cols,rows:this.layout.rows,difficulty:this.layout.difficulty,dead_ends:this.layout.dead_ends}:null,guidance:this.signal(now),config:this.cfg,reason:this.reason,round_id:this.round_id,setup_checked:this.setup_checked,sample_age_s:this.last_sample===null?null:now-this.last_sample,events:this.events.slice(-12)};}
+  snapshot(now){return{state:this.state,heist_mode:this.heist_mode,phase:this.phase,navigation_complete:this.navigation_complete,escape_bypassed:this.escape_bypassed,bypassed:this.bypassed,laser_cuts:this.laser_cuts,last_penalty:this.events.findLast(e=>e.event==='penalty'&&e.round_id===this.round_id)??null,last_laser_cut:this.events.findLast(e=>e.event==='penalty'&&e.reason==='laser cut'&&e.round_id===this.round_id)??null,tick:Math.floor(this.elapsed_s),toggle:this.state==='running',remaining_s:Math.round(this.remaining*1000)/1000,suspicion:Math.round(this.suspicion*1000)/1000,penalties:this.penalties,valid:this.fresh(now),point:this.fresh(now)?this.point:null,zone:this.zone(now),zones:this.zones(now),layout_id:this.layout?.key??null,maze:this.layout?.kind==='maze'?{cols:this.layout.cols,rows:this.layout.rows,difficulty:this.layout.difficulty,dead_ends:this.layout.dead_ends}:null,guidance:this.signal(now),config:this.cfg,reason:this.reason,round_id:this.round_id,setup_checked:this.setup_checked,sample_age_s:this.last_sample===null?null:now-this.last_sample,events:this.events.slice(-12)};}
 }

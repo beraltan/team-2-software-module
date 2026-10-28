@@ -5,7 +5,8 @@
   "scripts": {
     "build": "node tools/build-thing.mjs",
     "start": "node tools/preview.mjs",
-    "test": "node tools/build-thing.mjs && node --test app/test_heist.mjs app/test_spatial.mjs app/test_browser.mjs app/test_things.mjs app/test_maze.mjs"
+    "test": "node tools/build-thing.mjs && node --test app/test_heist.mjs app/test_spatial.mjs app/test_browser.mjs app/test_things.mjs app/test_maze.mjs app/test_skidule.mjs app/test_presenter.mjs app/test_morse.mjs app/test_laser.mjs app/test_mission.mjs app/test_hardware.mjs app/test_vault.mjs tools/test-device-lab.mjs",
+    "lab": "node tools/build-thing.mjs && node tools/device-lab.mjs"
   },
   "engines": {
     "node": ">=22"

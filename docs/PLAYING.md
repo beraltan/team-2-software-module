@@ -1,35 +1,38 @@
-# Playing and operating
+# Complete heist
 
-[Back to README](../README.md) · [First-time setup](DIY.md)
+The current one-file app uses the [full mission rules](HEIST.md): camera → Skidule → Morse → laser → vault release → escape, with a ten-minute shared clock. The camera-only rules below describe the original Challenge 1 standalone stage and its legacy 180-second engine defaults.
 
-The infiltrator moves through the physical field. The navigator watches the map and holds direction controls to send LED cues. Reach VAULT before time expires while avoiding red maze walls. Defaults: 180 seconds, 5-second penalty per anomaly, lockdown at 3 anomalies.
+# Playing the heist
 
-## Before a round
+[Back to README](../README.md) | [Shared controller and integration](HEIST.md)
 
-1. Keep one controller page open for your team, visible with its screen awake.
-2. Select the camera and check that one player is tracked correctly.
-3. While idle, set field dimensions, Mirror X, difficulty and penalties, then apply. Changing the field or difficulty requires a new setup check.
-4. Walk known points and mark START and VAULT from the current map. Keep bystanders outside the tracking area.
-5. Confirm setup, place the infiltrator at START and start.
+Two players, separate rooms, ten minutes. The infiltrator handles the physical bank; the hacker sees the hidden map and terminals. Cross the floor, pass the lasers, pick the four-bar lock, send the Morse override and return with the money.
 
-Default field: X −1.5 to +1.5 m, Y 1.5 to 3.5 m from the radar. Verify coordinate signs physically. Radar tracks body-position estimates, not individual footsteps.
+## Briefing and start
 
-## During play
+1. Choose **Connect your crew** for live Team 2 hardware, or **Try the offline heist** to practise.
+2. Keep one controller page visible and awake. Choose the Camera terminal, check radar orientation and the marked layout, and tick **Play area checked**.
+3. Put the infiltrator in the blue entrance safe zone, then click **Arm the heist**. The shared clock waits at 10:00.
+4. Leaving the safe zone starts the countdown. In the offline demo use map buttons or arrow keys to move the simulated player.
 
-Hold a guidance control to maintain a cue; release it for STOP. For someone facing the camera, intended directions are left = +X, right = −X, forward = −Y, back = +Y. Check the real LED interpretation first.
+## The five acts
 
-A wall-core contact or crossing between fresh samples causes an anomaly. One second clear of walls rearms detection. Walls are virtual penalty regions, so deliberate shortcuts can cost a penalty. See [maze details](MAZE.md).
+- **Cross the floor:** the hacker uses the map and direction controls. Reach the vault to complete entry. The clock keeps running.
+- **Pass the lasers:** avoid beams and press the physical finish button. In offline practice, simulate the button on the Laser card.
+- **Pick the lock:** potentiometer selects bar 1-4, slider changes height, and the button locks a MATCH. Cold/warm/match feedback guides the hacker. All four bars complete the lock.
+- **Send the override:** the partner transmits the numerical code with the Morse button. Read the lamp and received dots/dashes, then enter the passcode after the lock is complete.
+- **Get out:** return to the marked entrance safe zone. Radar confirmation stops the clock and opens the win screen.
 
-The layout stays fixed during play. Reaching VAULT wins; expiry or the anomaly limit loses. Inspect and reset after every attempt. Check the new map before returning to START.
+Each terminal shows its own information. The heist clock, objective and shared anomaly count stay above every view. Switching cards keeps the mission running.
 
-## Faults and recovery
+## Penalties and failure
 
-Tracking loss, camera restart, network loss, competing controllers or a hidden/suspended page can fault a round. Reconnection does not resume it. Fix the cause, reset and confirm setup again.
+Each new wall encounter or beam break deducts five seconds by default and adds one shared anomaly. Three anomalies trigger lockdown; time reaching zero also ends the heist. Return-trip walls count too. Locked module progress never cancels earlier penalties. A held legacy beam needs clearing; edge-based laser firmware must emit a unique ID only for each new break.
 
-For controller conflicts, close extra controller pages, wait three quiet seconds and reset. [Troubleshooting](TROUBLESHOOTING.md) covers other failures.
+A required connection fault interrupts the heist visibly. It does not resume automatically. Inspect the kit before resetting or explicitly resuming through Presenter controls. Radar is needed during entry and return; the vault stages allow the camera to remain stationary or temporarily untracked.
 
-Closing the browser does not stop camera publishing. To disable it, reconnect by USB, untick publishing in camera setup and save.
+## Presenter fallback
 
-## Offline demo
+Presenter controls can bypass a module, disable future laser penalties, resume an inspected fault, or confirm return after all four modules are complete. Assisted results are labelled. **Abort heist** stops an active attempt; **Reset entire heist** prepares a fresh ten-minute mission. **Run another heist** on the result screen also resets the mission.
 
-Choose **Try offline demo** in the opening dialog, confirm setup and start. Move with the buttons or arrow keys. It simulates positions without OOCSI; simulated guidance does not verify physical LEDs or radar.
+The software's getaway authorisation does not drive an unimplemented vault servo. Physical cue timing, sensor accuracy and delivery should be checked with the kit before the presentation.

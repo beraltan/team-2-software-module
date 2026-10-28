@@ -13,6 +13,13 @@ test('conflicting authority faults round, suppresses sends and requires quiet re
  assert.equal(c.game.state,'fault');assert.equal(c.game.signal(.1),'stop');assert.equal(c.heartbeat(.1),null);assert.throws(()=>c.reset(3));c.reset(3.2);assert.equal(c.conflict,false);assert.equal(c.game.setup_checked,false);
 });
 test('own messages do not conflict and startup listening period suppresses heartbeat',()=>{const c=live();c.receive({data:{toktik_session:c.session}},0);assert.equal(c.conflict,false);c.quietUntil=3;assert.equal(c.heartbeat(2),null);assert.throws(()=>c.start(0));assert(c.heartbeat(3));});
+test('continue on this screen clears a quiet conflict without restarting interrupted modules',()=>{
+ const c=live();c.start(0);c.skidule.state='running';c.morse.state='receiving';c.morse.lamp=true;
+ c.receive({sender:'extra-screen',data:{toktik_session:'extra',toktik_beat:1}},.1);
+ assert.throws(()=>c.clearConflict(2),/other screen/);c.clearConflict(3.2);
+ assert.equal(c.conflict,false);assert.equal(c.game.state,'fault');assert.equal(c.skidule.state,'fault');assert.equal(c.morse.state,'fault');assert.equal(c.morse.lamp,false);
+ assert.equal(c.heartbeat(3.2).toktik_guide,'stop');c.connected=false;assert.throws(()=>c.clearConflict(4),/Connect/);
+});
 test('live heartbeat supports firmware and publishes integration outcome',()=>{const c=live();c.start(0);const h=c.heartbeat(.1);assert.equal(h.toktik_state,'running');assert.equal(h.toktik_camera,'any_group_camera');assert(h.toktik_round_id);assert.equal(h.toktik_beat,1);c.fault('hidden',.2);assert.equal(c.heartbeat(.2).toktik_guide,'stop');assert.equal(c.game.state,'fault');});
 test('camera change invalidates calibration and old position',()=>{const c=live();c.selectCamera('next',.2);assert.equal(c.game.point,null);assert.equal(c.game.setup_checked,false);assert.equal(c.game.seq,-1);});
 test('camera boot restart and stale data cannot resume an attempt',()=>{const c=live();c.start(0);c.receive(radar(2,'new'),.1);assert.equal(c.game.state,'fault');const d=live();d.start(0);d.game.tick(1.1);d.receive(radar(2),1.2);assert.equal(d.game.state,'fault');});

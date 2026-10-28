@@ -5,6 +5,8 @@ export function teamChannel(team) {
   return 'OOCSI-things/'+slug;
 }
 export const outputs=['state','time_s','suspicion','penalties','guide','round_id','tick','toggle'];
+// Advertise module inputs too; full packets below remain the source of truth.
+export const inputs=['x_mm','y_mm','valid','module','event','device_id','boot_id','seq','bar_index','bar_count','knob','slider','bar_height','button_press_count','state','lampo_toggle','duration_ms','beam_id','event_id','round_id','mode','commanded','motion','angles','target_angles','servo_confirmed'];
 export class ThingsConnection {
   constructor({onMessage=()=>{},onStatus=()=>{},things=globalThis.oocsiThings,oocsi=globalThis.OOCSI,
     every=(fn,ms)=>setInterval(fn,ms),leave=()=>{location.search='?demo=1';}}={}) {
@@ -14,7 +16,7 @@ export class ThingsConnection {
     if(!this.things){location.search='';return;}
     if(this.started)return;
     this.channel=channel;this.started=true;this.onStatus('connecting');
-    this.things.register('Bank Heist','toktik',['x_mm','y_mm','valid'],outputs);
+    this.things.register('Bank Heist','toktik',inputs,outputs);
     for(const key of ['x_mm','y_mm','valid']){
       this.things.data(key);this.things.link('radar',key);
     }
@@ -32,6 +34,9 @@ export class ThingsConnection {
     this.oocsi.send(this.channel,data);
     // Course variables expose the same fields to other Things and their link() API.
     for(const key of outputs)this.variables[key](data['toktik_'+key]);
+  }
+  publish(data){
+    if(this.connected&&this.oocsi.isConnected())this.oocsi.send(this.channel,data);
   }
   close(){
     if(!this.started)return;
