@@ -1,16 +1,44 @@
-# Bank Heist setup
+# Setup and playing
 
-You need one browser for the hacker, an infiltrator, the physical modules, and internet for live OOCSI. The standalone **bank-heist.html** contains the interface, JavaScript and course libraries; players do not need Node or Python.
+[Hardware assembly, wiring and firmware](https://github.com/beraltan/team-2-hardware-module) · [Data exchange](INTERFACE.md)
 
-1. **Open the software.** [Download the raw HTML](https://github.com/beraltan/team-2-software-module/raw/refs/heads/main/bank-heist.html) and open it in Chrome/Edge. For a shareable web link, follow [Data Foundry hosting](DATA_FOUNDRY.md).
-2. **Try offline practice.** Simulated controls let you inspect each puzzle and presenter fallback without transmitting to OOCSI. These are simulated inputs, not hardware measurements.
-3. **Build and configure the hardware.** Use the [camera assembly guide](https://github.com/beraltan/team-2-hardware-module/blob/main/docs/BUILD_GUIDE.md) and [complete heist firmware package](https://github.com/beraltan/team-2-hardware-module/tree/main/challenge-2). The camera can use its Wi-Fi setup portal; the shared-config heist package instead reads a local Wi-Fi file at build time. Follow the instructions for the firmware you actually flash.
-4. **Match the channel.** Choose Team 2 in the browser and use `OOCSI-things/team-2` on every module. Other groups choose their own matching team channel. These are public messages; do not put credentials in them.
-5. **Test each module.** Home → **Test your module** checks camera tracking, Skidule controls, Morse presses, laser alignment/finish and vault commands. Several testers can observe inputs concurrently. Vault test buttons explicitly move the selected mechanism; finish in Automatic. Read [test instructions](TESTING_HARDWARE.md).
-6. **Set up the room.** The default field is X −1.5…1.5 m and Y 1.5…3.5 m from a level radar. Mark the map's entrance and vault area. Walk known positions and check X polarity, clearances and tracking before confirming setup. Camera cues assume the player faces the camera: left = +X, right = −X, forward = −Y, back = +Y.
-7. **Run one crew controller.** Keep it visible with the screen awake. Arm at the entrance; departure starts the shared ten-minute clock. Play **camera → Skidule → Morse → laser**. Skidule supplies access to the numerical Morse clue; prepare the physical clue sheet with digits, not letter codes. The current passcode is `2026`. Laser cuts cost five seconds and one anomaly during its stage. Its finish button completes Laser; all four completed modules release the automatic vault. Returning to the entrance ends the clock. See [heist rules](HEIST.md).
-8. **Recover deliberately.** Presenter controls can pass a failed module or confirm the return; the result records assistance. Connection loss, page suspension or stale active inputs can interrupt play. Inspect before resuming/resetting. Reconnection alone does not resume a round. Browser disconnection does not stop camera publishing.
+## Set up
 
-For another puzzle, use the [message contract](INTERFACE.md), validate round/result IDs and deduplicate completion events. `toktik_state: won` means the completed escape; `heist_navigation_complete` identifies camera entry completion. Edit [the source](../app/) and run `npm test` to rebuild the one-file module. Upload that regenerated file to update a hosted copy.
+1. Download the actual `bank-heist.html` file and open it in Chrome or Edge. No Python, Node or neighbouring files are needed to play.
+2. Put the ESPs and browser on an internet-connected network. For the camera, join `team2-radar` (password `aqswdefr`), open `http://192.168.4.1`, enter a 2.4 GHz personal network/hotspot and enable OOCSI sharing. Other devices use the hardware repo's Wi-Fi build configuration.
+3. Choose the same team on every device and in the browser: Team 2 is `OOCSI-things/team-2`. Select the intended device when several are discovered.
+4. Use **Test your module** before starting. Check radar coordinates, all four Skidule selections and slider range, Morse press/release flashes, laser cuts/finish and vault lock/unlock. Return the vault to Automatic.
+5. Mark the camera's tracked field and entrance safe zone. Verify left/right and near/far movement with the installed radar and shell. Keep the infiltrator facing the camera LED. Use one live controller tab and keep it visible.
 
-Preserve [attribution](../THIRD_PARTY.md). Team-owned code uses the MIT licence; upstream terms remain separate.
+OOCSI is public. Offline practice sends no gameplay data; live mode shares positions and game state on the selected channel.
+
+## Play
+
+The hacker sees the hidden map and puzzle feedback; the infiltrator operates the physical props. The intended arrangement uses separate rooms and no direct speech. Brief both players on the controls and LED cues first.
+
+1. **Camera:** check the play area, arm the heist and leave the entrance safe zone to start the ten-minute clock. Follow camera-light guidance through the maze.
+2. **Skidule:** the knob selects one of four bars, the slider changes its height and the button locks a matching bar. All four locks reveal the Morse code.
+3. **Morse:** transmit the code using short/long button presses. The hacker reads the flashes/dots/dashes and enters **2026** for validation.
+4. **Laser:** reach through the reflected beam path and press the finish button. The vault releases after all four stages are complete.
+5. **Escape:** take the money back to the entrance safe zone before time expires.
+
+Each new wall/laser violation costs five seconds and one strike. Three strikes or zero time cause lockdown. Skidule feedback currently stays on the hacker's screen; relaying it through the camera LED is not implemented.
+
+| Camera cue | Meaning |
+| --- | --- |
+| Blue, 1 / 2 pulses | Left / right |
+| Green, 3 / 4 pulses | Forward / back |
+| Steady red | Stop |
+| Blinking amber / off | Fault / idle |
+
+## Checks and recovery
+
+**Test your module** lets several people check inputs independently without becoming game controllers. Laser alignment shows detected/missing/stale beam status and pauses local counters; the emitter stays on. Explicit vault test buttons move the selected device. An acknowledgement reports a command, not measured motor movement.
+
+If a device disappears, check Wi-Fi, the exact team/channel and device selection. For missing radar data, check 5V, common ground and crossed TX/RX. The camera LED is deliberately dark while idle.
+
+A live connection or stale-input fault interrupts play. Fix the cause and reset deliberately. Close extra crew controllers before recovering. Presenter controls provide labelled bypasses; they are assisted results. A puzzle reset preserves the shared clock/strikes; **Reset entire heist** starts a fresh run.
+
+## Host on Data Foundry
+
+Upload only `bank-heist.html` to an **Existing Dataset**, enable **Web Access**, and select that file as the entry point. Share the playable URL. After code changes, run `npm test` and replace the hosted HTML with the rebuilt file.

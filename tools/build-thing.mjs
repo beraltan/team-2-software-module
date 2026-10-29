@@ -59,7 +59,7 @@ body:not(.ready) main{display:none}#header{position:static!important;padding:12p
 #courseHelp{position:fixed;z-index:11;bottom:20px;left:0;right:0;text-align:center;background:#090f17;padding:12px}body.ready #courseHelp{display:none}input{user-select:text!important}
 </style><script>
 // Adapted from Toktik, Copyright (c) 2024–2026 Mathias Funk / TU/e.
-// Team 2 adaptations; see THIRD_PARTY.md in the source repository.
+// Team 2 adaptations; source credits are in the repository README.
 const demo=new URLSearchParams(location.search).get('demo')==='1';
 const testing=new URLSearchParams(location.search).has('test');
 window.oocsiThingsConfig={teamspace:''};
@@ -68,6 +68,5 @@ if(!demo&&!testing){${safe(libraries)}\nwindow.getCourseChannel=()=>globalSettin
 // Guard team selection before the stock click handler runs; no network connection on empty input.
 html=html.replace('</body>',`<div id="courseHelp">Choose a team to share game data on public OOCSI. <a href="?demo=1">Try offline demo</a><p id="teamError" role="status"></p></div>
 <script>document.addEventListener('click',e=>{if(e.target.matches('#team-modal input[type=submit]')){try{modules.things.teamChannel(document.getElementById('team-choice').value);}catch(error){e.preventDefault();e.stopImmediatePropagation();document.getElementById('teamError').textContent=error.message;}}},true);</script></body>`);
-html=html.replace('<head>', '<head><!-- Team-owned code: '+await read('LICENSE')+'\nUpstream Toktik/OOCSI material retains its existing attribution and terms. -->');
 const destination=new URL('bank-heist.html',root);await writeFile(destination,html);
 console.log('Built '+fileURLToPath(destination));

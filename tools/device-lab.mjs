@@ -11,4 +11,4 @@ const html=live?`<!doctype html><html lang="en"><head><meta charset="utf-8"><met
 await mkdir(new URL('test-output/',root),{recursive:true});
 const file=live?'live-device-lab.html':'device-lab.html';
 await writeFile(new URL('test-output/'+file,root),html);
-console.log((live?'Real OOCSI emulator':'Isolated device lab')+': http://127.0.0.1:8127/test-output/'+file);
+console.log((live?'Real OOCSI emulator':'Isolated device lab')+': run npm start, then open http://127.0.0.1:'+(process.env.PORT||8080)+'/test-output/'+file);
